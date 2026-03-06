@@ -280,6 +280,7 @@
         isRecording: false,
         timerId: null,
         sequence: {},
+        pitchMap: {},
       };
 
       const els = {
@@ -304,23 +305,46 @@
 
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+      function midiToFreq(midi) {
+        return 440 * 2 ** ((midi - 69) / 12);
+      }
+
       const presets = {
         yolochka: {
           label: 'В лесу родилась ёлочка',
-          tempo: 112,
+          tempo: 102,
           steps: 64,
           sequence: {
             kick: [0, 8, 16, 24, 32, 40, 48, 56],
             snare: [4, 12, 20, 28, 36, 44, 52, 60],
             hihatClosed: [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62],
-            bass: [0, 12, 16, 28, 32, 44, 48, 60],
-            lead: [0, 4, 8, 4, 11, 8, 4, 4, 8, 11, 15, 11, 8, 4, 0, 0],
+            bass: [0, 8, 16, 24, 32, 40, 48, 56],
             synthPad: [0, 16, 32, 48],
+          },
+          melody: {
+            lead: [
+              { step: 0, midi: 64 },
+              { step: 4, midi: 64 },
+              { step: 8, midi: 64 },
+              { step: 12, midi: 60 },
+              { step: 16, midi: 64 },
+              { step: 20, midi: 67 },
+              { step: 24, midi: 67 },
+              { step: 28, midi: 65 },
+              { step: 32, midi: 64 },
+              { step: 36, midi: 62 },
+              { step: 40, midi: 60 },
+              { step: 44, midi: 62 },
+              { step: 48, midi: 64 },
+              { step: 52, midi: 64 },
+              { step: 56, midi: 64 },
+              { step: 60, midi: 64 },
+            ],
           },
         },
         katyusha: {
           label: 'Катюша',
-          tempo: 124,
+          tempo: 120,
           steps: 64,
           sequence: {
             kick: [0, 8, 12, 16, 24, 28, 32, 40, 44, 48, 56, 60],
@@ -328,8 +352,27 @@
             hihatClosed: [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62],
             clap: [20, 52],
             bass: [0, 8, 16, 24, 32, 40, 48, 56],
-            lead: [7, 9, 11, 12, 11, 9, 7, 5, 7, 9, 11, 12, 14, 12, 11, 9],
-            guitar: [7, 11, 14, 11, 9, 7, 9, 11],
+            guitar: [0, 8, 16, 24, 32, 40, 48, 56],
+          },
+          melody: {
+            lead: [
+              { step: 0, midi: 67 },
+              { step: 4, midi: 69 },
+              { step: 8, midi: 71 },
+              { step: 12, midi: 72 },
+              { step: 16, midi: 71 },
+              { step: 20, midi: 69 },
+              { step: 24, midi: 67 },
+              { step: 28, midi: 64 },
+              { step: 32, midi: 67 },
+              { step: 36, midi: 69 },
+              { step: 40, midi: 71 },
+              { step: 44, midi: 72 },
+              { step: 48, midi: 74 },
+              { step: 52, midi: 72 },
+              { step: 56, midi: 71 },
+              { step: 60, midi: 69 },
+            ],
           },
         },
       };
@@ -343,6 +386,14 @@
           next[track.id] = Array.from({ length: newSteps }, (_, i) => Boolean(old[i]));
         });
         state.sequence = next;
+
+        const nextPitchMap = {};
+        tracks.forEach((track) => {
+          const oldPitch = state.pitchMap[track.id] || [];
+          nextPitchMap[track.id] = Array.from({ length: newSteps }, (_, i) => oldPitch[i] ?? null);
+        });
+        state.pitchMap = nextPitchMap;
+
         if (state.currentStep >= newSteps) state.currentStep = 0;
       }
 
@@ -399,12 +450,12 @@
         gain.gain.exponentialRampToValueAtTime(0.001, startAt + NOTE_DECAY);
       }
 
-      function playNote(track) {
+      function playNote(track, freqOverride = null) {
         const now = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = track.type;
-        osc.frequency.value = track.freq;
+        osc.frequency.value = freqOverride ?? track.freq;
         createNoteEnvelope(gain, now);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -419,7 +470,8 @@
       function tick() {
         tracks.forEach((track) => {
           if (state.sequence[track.id][state.currentStep]) {
-            playNote(track);
+            const freq = state.pitchMap[track.id][state.currentStep] ?? track.freq;
+            playNote(track, freq);
           }
         });
         renderGrid();
@@ -454,6 +506,11 @@
 
       function toggleCell(trackId, step) {
         state.sequence[trackId][step] = !state.sequence[trackId][step];
+        if (state.sequence[trackId][step]) {
+          state.pitchMap[trackId][step] = state.pitchMap[trackId][step] ?? tracks.find((t) => t.id === trackId).freq;
+        } else {
+          state.pitchMap[trackId][step] = null;
+        }
         renderGrid();
       }
 
@@ -463,6 +520,7 @@
           tempo: state.tempo,
           steps: state.steps,
           sequence: state.sequence,
+          pitchMap: state.pitchMap,
           updatedAt: new Date().toISOString(),
         };
         localStorage.setItem('arm-kassira-track', JSON.stringify(payload));
@@ -486,6 +544,18 @@
             tracks.forEach((track) => {
               const incoming = payload.sequence[track.id] || [];
               state.sequence[track.id] = Array.from({ length: state.steps }, (_, i) => Boolean(incoming[i]));
+            });
+          }
+          if (payload.pitchMap) {
+            tracks.forEach((track) => {
+              const incomingPitch = payload.pitchMap[track.id] || [];
+              state.pitchMap[track.id] = Array.from({ length: state.steps }, (_, i) => Number(incomingPitch[i]) || null);
+            });
+          } else {
+            tracks.forEach((track) => {
+              state.pitchMap[track.id] = Array.from({ length: state.steps }, (_, i) =>
+                state.sequence[track.id][i] ? track.freq : null
+              );
             });
           }
           if (payload.tempo) {
@@ -567,10 +637,24 @@
 
         tracks.forEach((track) => {
           state.sequence[track.id] = Array(state.steps).fill(false);
+          state.pitchMap[track.id] = Array(state.steps).fill(null);
+
           const steps = preset.sequence[track.id] || [];
           steps.forEach((step) => {
             if (step >= 0 && step < state.steps) {
               state.sequence[track.id][step] = true;
+              state.pitchMap[track.id][step] = track.freq;
+            }
+          });
+        });
+
+        const melody = preset.melody || {};
+        Object.entries(melody).forEach(([trackId, notes]) => {
+          if (!state.sequence[trackId]) return;
+          notes.forEach(({ step, midi }) => {
+            if (step >= 0 && step < state.steps) {
+              state.sequence[trackId][step] = true;
+              state.pitchMap[trackId][step] = midiToFreq(midi);
             }
           });
         });
@@ -631,7 +715,7 @@
               const osc = offlineCtx.createOscillator();
               const gain = offlineCtx.createGain();
               osc.type = track.type;
-              osc.frequency.value = track.freq;
+              osc.frequency.value = state.pitchMap[track.id][step] ?? track.freq;
               createNoteEnvelope(gain, start);
               osc.connect(gain);
               gain.connect(offlineCtx.destination);
