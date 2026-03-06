@@ -217,6 +217,8 @@
               <option value="16">16</option>
               <option value="32" selected>32</option>
               <option value="64">64</option>
+              <option value="128">128</option>
+              <option value="192">192</option>
             </select>
             <input id="trackName" type="text" placeholder="Название трека" value="Демо-трек" />
             <button id="saveAudio">Сохранить WAV (3 мин)</button>
@@ -237,8 +239,14 @@
         </div>
 
         <p class="hint">
-          В расширенной версии больше дорожек (бочка, рабочий, хэты, томы и т.д.) и до 64 шагов.
+          В расширенной версии больше дорожек (бочка, рабочий, хэты, томы и т.д.) и до 192 шагов.
         </p>
+
+        <div class="toolbar-group" style="margin-top: 10px">
+          <span style="color: var(--muted); font-size: 13px">Готовые мелодии:</span>
+          <button id="presetYolochka">В лесу родилась ёлочка</button>
+          <button id="presetKatyusha">Катюша</button>
+        </div>
       </section>
     </main>
 
@@ -290,9 +298,41 @@
         status: document.getElementById('status'),
         barInfo: document.getElementById('barInfo'),
         stepsCount: document.getElementById('stepsCount'),
+        presetYolochka: document.getElementById('presetYolochka'),
+        presetKatyusha: document.getElementById('presetKatyusha'),
       };
 
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      const presets = {
+        yolochka: {
+          label: 'В лесу родилась ёлочка',
+          tempo: 112,
+          steps: 64,
+          sequence: {
+            kick: [0, 8, 16, 24, 32, 40, 48, 56],
+            snare: [4, 12, 20, 28, 36, 44, 52, 60],
+            hihatClosed: [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62],
+            bass: [0, 12, 16, 28, 32, 44, 48, 60],
+            lead: [0, 4, 8, 4, 11, 8, 4, 4, 8, 11, 15, 11, 8, 4, 0, 0],
+            synthPad: [0, 16, 32, 48],
+          },
+        },
+        katyusha: {
+          label: 'Катюша',
+          tempo: 124,
+          steps: 64,
+          sequence: {
+            kick: [0, 8, 12, 16, 24, 28, 32, 40, 44, 48, 56, 60],
+            snare: [4, 20, 36, 52],
+            hihatClosed: [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62],
+            clap: [20, 52],
+            bass: [0, 8, 16, 24, 32, 40, 48, 56],
+            lead: [7, 9, 11, 12, 11, 9, 7, 5, 7, 9, 11, 12, 14, 12, 11, 9],
+            guitar: [7, 11, 14, 11, 9, 7, 9, 11],
+          },
+        },
+      };
 
       function resetSequence(newSteps) {
         state.steps = newSteps;
@@ -438,7 +478,7 @@
 
         try {
           const payload = JSON.parse(raw);
-          const incomingSteps = Math.min(64, Math.max(16, Number(payload.steps) || 32));
+          const incomingSteps = Math.min(192, Math.max(16, Number(payload.steps) || 32));
           resetSequence(incomingSteps);
           els.stepsCount.value = String(incomingSteps);
 
@@ -513,6 +553,61 @@
         return new Blob([buffer], { type: 'audio/wav' });
       }
 
+      function applyPreset(presetName) {
+        const preset = presets[presetName];
+        if (!preset) return;
+
+        resetSequence(preset.steps);
+        buildGrid();
+
+        state.tempo = Math.min(160, Math.max(80, Number(preset.tempo) || 110));
+        els.tempo.value = String(state.tempo);
+        els.stepsCount.value = String(preset.steps);
+        updateTempoDisplay();
+
+        tracks.forEach((track) => {
+          state.sequence[track.id] = Array(state.steps).fill(false);
+          const steps = preset.sequence[track.id] || [];
+          steps.forEach((step) => {
+            if (step >= 0 && step < state.steps) {
+              state.sequence[track.id][step] = true;
+            }
+          });
+        });
+
+        if (state.isPlaying) {
+          clearInterval(state.timerId);
+          state.timerId = setInterval(tick, stepDurationMs());
+        }
+
+        renderGrid();
+        updateStatus(`загружен пресет: ${preset.label}`);
+      }
+
+      function downloadBlob(blob, filename) {
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+        if (window.navigator?.msSaveOrOpenBlob) {
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+        }
+      }
+
+      function createOfflineContext(channels, frameCount, sampleRate) {
+        const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        if (!OfflineCtx) {
+          throw new Error('OfflineAudioContext is not supported in this browser.');
+        }
+        return new OfflineCtx(channels, frameCount, sampleRate);
+      }
+
       async function exportTrackWav() {
         updateStatus('идет рендер WAV (3 мин), подождите...');
 
@@ -522,7 +617,7 @@
         const loopsToRender = Math.ceil(totalDuration / loopDuration);
         const tail = 0.5;
         const frameCount = Math.ceil((totalDuration + tail) * WAV_SAMPLE_RATE);
-        const offlineCtx = new OfflineAudioContext(2, frameCount, WAV_SAMPLE_RATE);
+        const offlineCtx = createOfflineContext(2, frameCount, WAV_SAMPLE_RATE);
 
         for (let loopIndex = 0; loopIndex < loopsToRender; loopIndex += 1) {
           const loopOffset = loopIndex * loopDuration;
@@ -531,6 +626,7 @@
               if (!isActive) return;
               const start = loopOffset + step * stepDuration;
               if (start > totalDuration) return;
+              if (start + NOTE_ATTACK >= totalDuration + tail) return;
 
               const osc = offlineCtx.createOscillator();
               const gain = offlineCtx.createGain();
@@ -546,18 +642,17 @@
         }
 
         const rendered = await offlineCtx.startRendering();
-        const blob = audioBufferToWavBlob(rendered);
+        const trimmedFrameCount = Math.floor(totalDuration * WAV_SAMPLE_RATE);
+        const bufferFactoryCtx = createOfflineContext(2, 1, WAV_SAMPLE_RATE);
+        const finalBuffer = bufferFactoryCtx.createBuffer(2, trimmedFrameCount, WAV_SAMPLE_RATE);
+        for (let ch = 0; ch < 2; ch += 1) {
+          finalBuffer.copyToChannel(rendered.getChannelData(ch).slice(0, trimmedFrameCount), ch);
+        }
+        const blob = audioBufferToWavBlob(finalBuffer);
         const fileNameBase = (els.trackName.value.trim() || 'track').replace(/\s+/g, '_').toLowerCase();
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.download = `${fileNameBase}.wav`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-        updateStatus(`аудио сохранено: ${link.download} (3 мин)`);
+        const fileName = `${fileNameBase}.wav`;
+        downloadBlob(blob, fileName);
+        updateStatus(`аудио сохранено: ${fileName} (3 мин)`);
       }
 
       function exportTrackJson() {
@@ -569,15 +664,9 @@
           exportedAt: new Date().toISOString(),
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${payload.name.replace(/\s+/g, '_').toLowerCase() || 'track'}.json`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        updateStatus(`экспортировано: ${link.download}`);
+        const fileName = `${payload.name.replace(/\s+/g, '_').toLowerCase() || 'track'}.json`;
+        downloadBlob(blob, fileName);
+        updateStatus(`экспортировано: ${fileName}`);
       }
 
       els.gridBody.addEventListener('click', (event) => {
@@ -612,6 +701,8 @@
       els.saveProject.addEventListener('click', saveTrack);
       els.loadLocal.addEventListener('click', loadTrack);
       els.exportJson.addEventListener('click', exportTrackJson);
+      els.presetYolochka.addEventListener('click', () => applyPreset('yolochka'));
+      els.presetKatyusha.addEventListener('click', () => applyPreset('katyusha'));
 
       document.addEventListener('keydown', (event) => {
         if (!state.isRecording) return;
