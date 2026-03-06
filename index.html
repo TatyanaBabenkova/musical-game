@@ -251,9 +251,9 @@
     </main>
 
     <script>
-      const NOTE_ATTACK = 0.01;
-      const NOTE_DECAY = 0.32;
-      const NOTE_VOLUME = 0.2;
+      const NOTE_ATTACK = 0.008;
+      const NOTE_DECAY = 0.24;
+      const NOTE_VOLUME = 0.18;
       const WAV_EXPORT_DURATION_SECONDS = 180;
       const WAV_SAMPLE_RATE = 22050;
 
@@ -281,6 +281,7 @@
         timerId: null,
         sequence: {},
         pitchMap: {},
+        gateMap: {},
       };
 
       const els = {
@@ -309,69 +310,70 @@
         return 440 * 2 ** ((midi - 69) / 12);
       }
 
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
       const presets = {
         yolochka: {
           label: 'В лесу родилась ёлочка',
-          tempo: 102,
+          tempo: 96,
           steps: 64,
           sequence: {
-            kick: [0, 8, 16, 24, 32, 40, 48, 56],
-            snare: [4, 12, 20, 28, 36, 44, 52, 60],
-            hihatClosed: [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62],
-            bass: [0, 8, 16, 24, 32, 40, 48, 56],
-            synthPad: [0, 16, 32, 48],
+            kick: [0, 16, 32, 48],
+            snare: [8, 24, 40, 56],
+            hihatClosed: [4, 12, 20, 28, 36, 44, 52, 60],
+            bass: [0, 12, 16, 28, 32, 44, 48, 60],
+            synthPad: [0, 32],
           },
           melody: {
             lead: [
-              { step: 0, midi: 64 },
-              { step: 4, midi: 64 },
-              { step: 8, midi: 64 },
-              { step: 12, midi: 60 },
-              { step: 16, midi: 64 },
-              { step: 20, midi: 67 },
-              { step: 24, midi: 67 },
-              { step: 28, midi: 65 },
-              { step: 32, midi: 64 },
-              { step: 36, midi: 62 },
-              { step: 40, midi: 60 },
-              { step: 44, midi: 62 },
-              { step: 48, midi: 64 },
-              { step: 52, midi: 64 },
-              { step: 56, midi: 64 },
-              { step: 60, midi: 64 },
+              { step: 0, midi: 64, len: 2 },
+              { step: 4, midi: 64, len: 2 },
+              { step: 8, midi: 67, len: 2 },
+              { step: 12, midi: 67, len: 2 },
+              { step: 16, midi: 69, len: 2 },
+              { step: 20, midi: 69, len: 2 },
+              { step: 24, midi: 67, len: 4 },
+              { step: 32, midi: 65, len: 2 },
+              { step: 36, midi: 65, len: 2 },
+              { step: 40, midi: 64, len: 2 },
+              { step: 44, midi: 64, len: 2 },
+              { step: 48, midi: 62, len: 2 },
+              { step: 52, midi: 62, len: 2 },
+              { step: 56, midi: 60, len: 4 },
             ],
           },
         },
         katyusha: {
           label: 'Катюша',
-          tempo: 120,
+          tempo: 114,
           steps: 64,
           sequence: {
-            kick: [0, 8, 12, 16, 24, 28, 32, 40, 44, 48, 56, 60],
-            snare: [4, 20, 36, 52],
+            kick: [0, 8, 16, 24, 32, 40, 48, 56],
+            snare: [8, 24, 40, 56],
             hihatClosed: [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62],
-            clap: [20, 52],
-            bass: [0, 8, 16, 24, 32, 40, 48, 56],
-            guitar: [0, 8, 16, 24, 32, 40, 48, 56],
+            clap: [24, 56],
+            bass: [0, 16, 32, 48],
+            guitar: [0, 16, 32, 48],
           },
           melody: {
             lead: [
-              { step: 0, midi: 67 },
-              { step: 4, midi: 69 },
-              { step: 8, midi: 71 },
-              { step: 12, midi: 72 },
-              { step: 16, midi: 71 },
-              { step: 20, midi: 69 },
-              { step: 24, midi: 67 },
-              { step: 28, midi: 64 },
-              { step: 32, midi: 67 },
-              { step: 36, midi: 69 },
-              { step: 40, midi: 71 },
-              { step: 44, midi: 72 },
-              { step: 48, midi: 74 },
-              { step: 52, midi: 72 },
-              { step: 56, midi: 71 },
-              { step: 60, midi: 69 },
+              { step: 0, midi: 67, len: 2 },
+              { step: 4, midi: 71, len: 2 },
+              { step: 8, midi: 72, len: 2 },
+              { step: 12, midi: 74, len: 2 },
+              { step: 16, midi: 72, len: 2 },
+              { step: 20, midi: 71, len: 2 },
+              { step: 24, midi: 69, len: 4 },
+              { step: 32, midi: 67, len: 2 },
+              { step: 36, midi: 69, len: 2 },
+              { step: 40, midi: 71, len: 2 },
+              { step: 44, midi: 72, len: 2 },
+              { step: 48, midi: 74, len: 2 },
+              { step: 52, midi: 72, len: 2 },
+              { step: 56, midi: 71, len: 2 },
+              { step: 60, midi: 69, len: 4 },
             ],
           },
         },
@@ -393,6 +395,13 @@
           nextPitchMap[track.id] = Array.from({ length: newSteps }, (_, i) => oldPitch[i] ?? null);
         });
         state.pitchMap = nextPitchMap;
+
+        const nextGateMap = {};
+        tracks.forEach((track) => {
+          const oldGate = state.gateMap[track.id] || [];
+          nextGateMap[track.id] = Array.from({ length: newSteps }, (_, i) => oldGate[i] ?? 1);
+        });
+        state.gateMap = nextGateMap;
 
         if (state.currentStep >= newSteps) state.currentStep = 0;
       }
@@ -450,17 +459,27 @@
         gain.gain.exponentialRampToValueAtTime(0.001, startAt + NOTE_DECAY);
       }
 
-      function playNote(track, freqOverride = null) {
+      function playNote(track, options = {}) {
         const now = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+
+        const frequency = options.frequency ?? track.freq;
+        const attack = options.attack ?? NOTE_ATTACK;
+        const decay = options.decay ?? NOTE_DECAY;
+        const volume = options.volume ?? NOTE_VOLUME;
+
         osc.type = track.type;
-        osc.frequency.value = freqOverride ?? track.freq;
-        createNoteEnvelope(gain, now);
+        osc.frequency.value = frequency;
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(volume, now + attack);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + decay);
+
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
-        osc.stop(now + NOTE_DECAY + 0.02);
+        osc.stop(now + decay + 0.02);
       }
 
       function stepDurationMs() {
@@ -471,7 +490,15 @@
         tracks.forEach((track) => {
           if (state.sequence[track.id][state.currentStep]) {
             const freq = state.pitchMap[track.id][state.currentStep] ?? track.freq;
-            playNote(track, freq);
+            const gate = clamp(Number(state.gateMap[track.id][state.currentStep]) || 1, 0.35, 3.5);
+            const decay = Math.max(NOTE_DECAY, (stepDurationMs() / 1000) * gate * 0.9);
+            const isLead = track.id === 'lead';
+            playNote(track, {
+              frequency: freq,
+              decay,
+              volume: isLead ? 0.24 : NOTE_VOLUME,
+              attack: isLead ? 0.005 : NOTE_ATTACK,
+            });
           }
         });
         renderGrid();
@@ -508,8 +535,10 @@
         state.sequence[trackId][step] = !state.sequence[trackId][step];
         if (state.sequence[trackId][step]) {
           state.pitchMap[trackId][step] = state.pitchMap[trackId][step] ?? tracks.find((t) => t.id === trackId).freq;
+          state.gateMap[trackId][step] = state.gateMap[trackId][step] ?? 1;
         } else {
           state.pitchMap[trackId][step] = null;
+          state.gateMap[trackId][step] = 1;
         }
         renderGrid();
       }
@@ -521,6 +550,7 @@
           steps: state.steps,
           sequence: state.sequence,
           pitchMap: state.pitchMap,
+          gateMap: state.gateMap,
           updatedAt: new Date().toISOString(),
         };
         localStorage.setItem('arm-kassira-track', JSON.stringify(payload));
@@ -556,6 +586,17 @@
               state.pitchMap[track.id] = Array.from({ length: state.steps }, (_, i) =>
                 state.sequence[track.id][i] ? track.freq : null
               );
+            });
+          }
+
+          if (payload.gateMap) {
+            tracks.forEach((track) => {
+              const incomingGate = payload.gateMap[track.id] || [];
+              state.gateMap[track.id] = Array.from({ length: state.steps }, (_, i) => Number(incomingGate[i]) || 1);
+            });
+          } else {
+            tracks.forEach((track) => {
+              state.gateMap[track.id] = Array.from({ length: state.steps }, () => 1);
             });
           }
           if (payload.tempo) {
@@ -638,6 +679,7 @@
         tracks.forEach((track) => {
           state.sequence[track.id] = Array(state.steps).fill(false);
           state.pitchMap[track.id] = Array(state.steps).fill(null);
+          state.gateMap[track.id] = Array(state.steps).fill(1);
 
           const steps = preset.sequence[track.id] || [];
           steps.forEach((step) => {
@@ -651,10 +693,11 @@
         const melody = preset.melody || {};
         Object.entries(melody).forEach(([trackId, notes]) => {
           if (!state.sequence[trackId]) return;
-          notes.forEach(({ step, midi }) => {
+          notes.forEach(({ step, midi, len = 1 }) => {
             if (step >= 0 && step < state.steps) {
               state.sequence[trackId][step] = true;
               state.pitchMap[trackId][step] = midiToFreq(midi);
+              state.gateMap[trackId][step] = clamp(Number(len) || 1, 0.5, 4);
             }
           });
         });
@@ -714,13 +757,22 @@
 
               const osc = offlineCtx.createOscillator();
               const gain = offlineCtx.createGain();
+              const freq = state.pitchMap[track.id][step] ?? track.freq;
+              const gate = clamp(Number(state.gateMap[track.id][step]) || 1, 0.35, 3.5);
+              const decay = Math.max(NOTE_DECAY, stepDuration * gate * 0.9);
+              const volume = track.id === 'lead' ? 0.24 : NOTE_VOLUME;
+              const attack = track.id === 'lead' ? 0.005 : NOTE_ATTACK;
+
               osc.type = track.type;
-              osc.frequency.value = state.pitchMap[track.id][step] ?? track.freq;
-              createNoteEnvelope(gain, start);
+              osc.frequency.value = freq;
+              gain.gain.setValueAtTime(0.001, start);
+              gain.gain.exponentialRampToValueAtTime(volume, start + attack);
+              gain.gain.exponentialRampToValueAtTime(0.001, start + decay);
+
               osc.connect(gain);
               gain.connect(offlineCtx.destination);
               osc.start(start);
-              osc.stop(start + NOTE_DECAY + 0.02);
+              osc.stop(start + decay + 0.02);
             });
           });
         }
@@ -745,6 +797,8 @@
           tempo: state.tempo,
           steps: state.steps,
           sequence: state.sequence,
+          pitchMap: state.pitchMap,
+          gateMap: state.gateMap,
           exportedAt: new Date().toISOString(),
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
