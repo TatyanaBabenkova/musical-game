@@ -241,6 +241,11 @@
 
     <script>
       const STEPS = 16;
+      const NOTE_ATTACK = 0.01;
+      const NOTE_DECAY = 0.34;
+      const NOTE_VOLUME = 0.2;
+      const WAV_EXPORT_DURATION_SECONDS = 180;
+
       const tracks = [
         { id: 'drums', name: 'Ударные', color: '#f97316', freq: 90, type: 'square' },
         { id: 'cymbals', name: 'Тарелки', color: '#facc15', freq: 1600, type: 'triangle' },
@@ -334,13 +339,13 @@
         osc.type = track.type;
         osc.frequency.value = track.freq;
         gain.gain.setValueAtTime(0.001, now);
-        gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+        gain.gain.exponentialRampToValueAtTime(NOTE_VOLUME, now + NOTE_ATTACK);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + NOTE_DECAY);
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
-        osc.stop(now + 0.18);
+        osc.stop(now + NOTE_DECAY + 0.02);
       }
 
       function stepDurationMs() {
@@ -380,7 +385,7 @@
       function toggleRecording() {
         state.isRecording = !state.isRecording;
         els.recBtn.dataset.state = state.isRecording ? 'active' : '';
-        updateStatus(state.isRecording ? 'режим записи включен' : 'режим записи выключен');
+        updateStatus(state.isRecording ? 'режим записи включен' : 'режим записи выклчен');
       }
 
       function toggleCell(trackId, step) {
@@ -484,28 +489,35 @@
 
       async function exportTrackWav() {
         const stepDuration = stepDurationMs() / 1000;
-        const trackLength = STEPS * stepDuration;
-        const tail = 0.3;
-        const sampleRate = 44100;
-        const offlineCtx = new OfflineAudioContext(2, Math.ceil((trackLength + tail) * sampleRate), sampleRate);
+        const loopDuration = STEPS * stepDuration;
+        const totalDuration = WAV_EXPORT_DURATION_SECONDS;
+        const loopsToRender = Math.ceil(totalDuration / loopDuration);
+        const tail = 0.4;
+        const sampleRate = 32000;
+        const offlineCtx = new OfflineAudioContext(2, Math.ceil((totalDuration + tail) * sampleRate), sampleRate);
 
-        tracks.forEach((track) => {
-          state.sequence[track.id].forEach((isActive, step) => {
-            if (!isActive) return;
-            const start = step * stepDuration;
-            const osc = offlineCtx.createOscillator();
-            const gain = offlineCtx.createGain();
-            osc.type = track.type;
-            osc.frequency.value = track.freq;
-            gain.gain.setValueAtTime(0.001, start);
-            gain.gain.exponentialRampToValueAtTime(0.2, start + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.16);
-            osc.connect(gain);
-            gain.connect(offlineCtx.destination);
-            osc.start(start);
-            osc.stop(start + 0.18);
+        for (let loopIndex = 0; loopIndex < loopsToRender; loopIndex += 1) {
+          const loopOffset = loopIndex * loopDuration;
+          tracks.forEach((track) => {
+            state.sequence[track.id].forEach((isActive, step) => {
+              if (!isActive) return;
+              const start = loopOffset + step * stepDuration;
+              if (start > totalDuration) return;
+
+              const osc = offlineCtx.createOscillator();
+              const gain = offlineCtx.createGain();
+              osc.type = track.type;
+              osc.frequency.value = track.freq;
+              gain.gain.setValueAtTime(0.001, start);
+              gain.gain.exponentialRampToValueAtTime(NOTE_VOLUME, start + NOTE_ATTACK);
+              gain.gain.exponentialRampToValueAtTime(0.001, start + NOTE_DECAY);
+              osc.connect(gain);
+              gain.connect(offlineCtx.destination);
+              osc.start(start);
+              osc.stop(start + NOTE_DECAY + 0.02);
+            });
           });
-        });
+        }
 
         const renderedBuffer = await offlineCtx.startRendering();
         const blob = audioBufferToWavBlob(renderedBuffer);
@@ -516,7 +528,7 @@
         link.download = `${fileNameBase}.wav`;
         link.click();
         URL.revokeObjectURL(url);
-        updateStatus(`аудио сохранено: ${link.download}`);
+        updateStatus(`аудио сохранено: ${link.download} (3 мин)`);
       }
 
       function exportTrackJson() {
