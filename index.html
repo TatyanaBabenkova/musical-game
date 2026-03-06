@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Музыкальная игра — мини-секвенсор</title>
+    <title>Музыкальная игра — расширенный секвенсор</title>
     <style>
       :root {
         color-scheme: dark;
@@ -26,20 +26,20 @@
         margin: 0;
         background: radial-gradient(circle at top, #171d2d, var(--bg) 40%);
         color: var(--text);
-        font-family: "Inter", "Segoe UI", sans-serif;
+        font-family: Inter, Segoe UI, sans-serif;
       }
 
       .app {
-        max-width: 1220px;
-        margin: 24px auto;
-        padding: 16px;
+        max-width: 1500px;
+        margin: 20px auto;
+        padding: 14px;
       }
 
       .panel {
         background: rgba(26, 31, 43, 0.94);
         border: 1px solid var(--line);
         border-radius: 16px;
-        padding: 16px;
+        padding: 14px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       }
 
@@ -47,9 +47,9 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 10px;
         flex-wrap: wrap;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
 
       .toolbar-group {
@@ -72,7 +72,6 @@
 
       button {
         cursor: pointer;
-        transition: 0.16s ease;
       }
 
       button:hover {
@@ -101,23 +100,28 @@
       }
 
       .tempo output {
-        min-width: 42px;
+        min-width: 44px;
         color: var(--accent-2);
       }
 
       .grid-wrap {
         border: 1px solid var(--line);
         border-radius: 14px;
-        overflow: hidden;
+        overflow: auto;
+        max-height: 68vh;
       }
 
       .grid-header,
       .grid-row {
         display: grid;
-        grid-template-columns: 180px repeat(16, minmax(24px, 1fr));
+        grid-template-columns: 210px repeat(var(--steps), minmax(26px, 1fr));
+        min-width: max-content;
       }
 
       .grid-header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
         background: #1b2231;
       }
 
@@ -125,22 +129,23 @@
       .grid-row > div {
         border-right: 1px solid var(--line);
         border-bottom: 1px solid var(--line);
-        min-height: 34px;
+        min-height: 30px;
       }
 
       .grid-header .step {
         display: grid;
         place-items: center;
-        font-size: 12px;
+        font-size: 11px;
         color: var(--muted);
       }
 
       .track-label {
-        padding: 8px 10px;
+        padding: 6px 8px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
+        font-size: 13px;
       }
 
       .instrument-dot {
@@ -156,20 +161,20 @@
         position: relative;
       }
 
-      .cell:nth-child(4n + 2) {
-        box-shadow: -1px 0 0 0 #4c5570 inset;
+      .cell.bar-start {
+        box-shadow: -1px 0 0 0 #5f6a88 inset;
       }
 
       .cell.active {
-        background: linear-gradient(180deg, rgba(69, 215, 199, 0.28), rgba(69, 215, 199, 0.48));
+        background: linear-gradient(180deg, rgba(69, 215, 199, 0.25), rgba(69, 215, 199, 0.52));
       }
 
       .cell.playhead::after {
         content: '';
         position: absolute;
-        inset: 2px;
-        border: 1px solid rgba(124, 155, 255, 0.9);
-        border-radius: 6px;
+        inset: 1px;
+        border: 1px solid rgba(124, 155, 255, 0.95);
+        border-radius: 4px;
       }
 
       .meta {
@@ -183,16 +188,9 @@
       }
 
       .hint {
-        margin-top: 12px;
+        margin-top: 10px;
         font-size: 12px;
         color: #8f99b6;
-      }
-
-      @media (max-width: 900px) {
-        .grid-header,
-        .grid-row {
-          grid-template-columns: 120px repeat(16, minmax(20px, 1fr));
-        }
       }
     </style>
   </head>
@@ -214,8 +212,14 @@
           </div>
 
           <div class="toolbar-group">
+            <label for="stepsCount">Шагов:</label>
+            <select id="stepsCount">
+              <option value="16">16</option>
+              <option value="32" selected>32</option>
+              <option value="64">64</option>
+            </select>
             <input id="trackName" type="text" placeholder="Название трека" value="Демо-трек" />
-            <button id="saveAudio">Сохранить WAV</button>
+            <button id="saveAudio">Сохранить WAV (3 мин)</button>
             <button id="saveProject">Сохранить проект</button>
             <button id="loadLocal">Загрузить</button>
             <button id="exportJson">Экспорт JSON</button>
@@ -233,38 +237,41 @@
         </div>
 
         <p class="hint">
-          По клику включается шаг. В режиме <strong>Rec</strong> можно нажимать цифры
-          <strong>1-6</strong>, чтобы записывать шаг в текущей позиции.
+          В расширенной версии больше дорожек (бочка, рабочий, хэты, томы и т.д.) и до 64 шагов.
         </p>
       </section>
     </main>
 
     <script>
-      const STEPS = 16;
       const NOTE_ATTACK = 0.01;
-      const NOTE_DECAY = 0.34;
+      const NOTE_DECAY = 0.32;
       const NOTE_VOLUME = 0.2;
       const WAV_EXPORT_DURATION_SECONDS = 180;
+      const WAV_SAMPLE_RATE = 22050;
 
       const tracks = [
-        { id: 'drums', name: 'Ударные', color: '#f97316', freq: 90, type: 'square' },
-        { id: 'cymbals', name: 'Тарелки', color: '#facc15', freq: 1600, type: 'triangle' },
-        { id: 'guitar', name: 'Гитара', color: '#22c55e', freq: 220, type: 'sawtooth' },
-        { id: 'synth', name: 'Синтезатор', color: '#38bdf8', freq: 330, type: 'triangle' },
-        { id: 'brass', name: 'Духовые', color: '#a78bfa', freq: 260, type: 'square' },
+        { id: 'kick', name: 'Бочка (Kick)', color: '#f97316', freq: 65, type: 'sine' },
+        { id: 'snare', name: 'Рабочий (Snare)', color: '#fb7185', freq: 190, type: 'triangle' },
+        { id: 'hihatClosed', name: 'Хэт закрытый', color: '#facc15', freq: 1900, type: 'square' },
+        { id: 'hihatOpen', name: 'Хэт открытый', color: '#f59e0b', freq: 1450, type: 'triangle' },
+        { id: 'clap', name: 'Клэп', color: '#fda4af', freq: 900, type: 'square' },
+        { id: 'tom', name: 'Том', color: '#fb923c', freq: 130, type: 'sine' },
+        { id: 'crash', name: 'Крэш', color: '#fde047', freq: 2200, type: 'sawtooth' },
+        { id: 'ride', name: 'Райд', color: '#fcd34d', freq: 1700, type: 'triangle' },
         { id: 'bass', name: 'Бас', color: '#ef4444', freq: 110, type: 'sine' },
+        { id: 'guitar', name: 'Гитара', color: '#22c55e', freq: 220, type: 'sawtooth' },
+        { id: 'synthPad', name: 'Синт-пэд', color: '#38bdf8', freq: 300, type: 'triangle' },
+        { id: 'lead', name: 'Лид', color: '#a78bfa', freq: 440, type: 'square' },
       ];
 
       const state = {
+        steps: 32,
         tempo: 110,
         currentStep: 0,
         isPlaying: false,
         isRecording: false,
         timerId: null,
-        sequence: tracks.reduce((acc, track) => {
-          acc[track.id] = Array(STEPS).fill(false);
-          return acc;
-        }, {}),
+        sequence: {},
       };
 
       const els = {
@@ -282,13 +289,26 @@
         trackName: document.getElementById('trackName'),
         status: document.getElementById('status'),
         barInfo: document.getElementById('barInfo'),
+        stepsCount: document.getElementById('stepsCount'),
       };
 
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+      function resetSequence(newSteps) {
+        state.steps = newSteps;
+        document.documentElement.style.setProperty('--steps', String(newSteps));
+        const next = {};
+        tracks.forEach((track) => {
+          const old = state.sequence[track.id] || [];
+          next[track.id] = Array.from({ length: newSteps }, (_, i) => Boolean(old[i]));
+        });
+        state.sequence = next;
+        if (state.currentStep >= newSteps) state.currentStep = 0;
+      }
+
       function buildGrid() {
         const headerCells = ['<div class="track-label">Инструмент</div>'];
-        for (let i = 1; i <= STEPS; i += 1) {
+        for (let i = 1; i <= state.steps; i += 1) {
           headerCells.push(`<div class="step">${i}</div>`);
         }
         els.gridHeader.innerHTML = headerCells.join('');
@@ -296,8 +316,9 @@
         const rows = tracks
           .map((track) => {
             const label = `<div class="track-label"><span>${track.name}</span><span class="instrument-dot" style="background:${track.color}"></span></div>`;
-            const cells = Array.from({ length: STEPS }, (_, step) => {
-              return `<div class="cell" data-track="${track.id}" data-step="${step}"></div>`;
+            const cells = Array.from({ length: state.steps }, (_, step) => {
+              const barStart = step % 4 === 0 ? 'bar-start' : '';
+              return `<div class="cell ${barStart}" data-track="${track.id}" data-step="${step}"></div>`;
             }).join('');
             return `<div class="grid-row">${label}${cells}</div>`;
           })
@@ -328,8 +349,14 @@
           });
         });
         els.barInfo.textContent = state.isPlaying
-          ? `Текущий шаг: ${state.currentStep + 1} / ${STEPS}`
+          ? `Текущий шаг: ${state.currentStep + 1} / ${state.steps}`
           : 'Текущий шаг: —';
+      }
+
+      function createNoteEnvelope(gain, startAt) {
+        gain.gain.setValueAtTime(0.001, startAt);
+        gain.gain.exponentialRampToValueAtTime(NOTE_VOLUME, startAt + NOTE_ATTACK);
+        gain.gain.exponentialRampToValueAtTime(0.001, startAt + NOTE_DECAY);
       }
 
       function playNote(track) {
@@ -338,10 +365,7 @@
         const gain = audioCtx.createGain();
         osc.type = track.type;
         osc.frequency.value = track.freq;
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.exponentialRampToValueAtTime(NOTE_VOLUME, now + NOTE_ATTACK);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + NOTE_DECAY);
-
+        createNoteEnvelope(gain, now);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
@@ -359,7 +383,7 @@
           }
         });
         renderGrid();
-        state.currentStep = (state.currentStep + 1) % STEPS;
+        state.currentStep = (state.currentStep + 1) % state.steps;
       }
 
       function startPlayback() {
@@ -385,7 +409,7 @@
       function toggleRecording() {
         state.isRecording = !state.isRecording;
         els.recBtn.dataset.state = state.isRecording ? 'active' : '';
-        updateStatus(state.isRecording ? 'режим записи включен' : 'режим записи выклчен');
+        updateStatus(state.isRecording ? 'режим записи включен' : 'режим записи выключен');
       }
 
       function toggleCell(trackId, step) {
@@ -397,26 +421,31 @@
         const payload = {
           name: els.trackName.value.trim() || 'Без названия',
           tempo: state.tempo,
+          steps: state.steps,
           sequence: state.sequence,
           updatedAt: new Date().toISOString(),
         };
         localStorage.setItem('arm-kassira-track', JSON.stringify(payload));
-        updateStatus(`сохранено: ${payload.name}`);
+        updateStatus(`проект сохранен: ${payload.name}`);
       }
 
       function loadTrack() {
         const raw = localStorage.getItem('arm-kassira-track');
         if (!raw) {
-          updateStatus('не найден сохраненный трек');
+          updateStatus('не найден сохраненный проект');
           return;
         }
 
         try {
           const payload = JSON.parse(raw);
+          const incomingSteps = Math.min(64, Math.max(16, Number(payload.steps) || 32));
+          resetSequence(incomingSteps);
+          els.stepsCount.value = String(incomingSteps);
+
           if (payload.sequence) {
             tracks.forEach((track) => {
               const incoming = payload.sequence[track.id] || [];
-              state.sequence[track.id] = Array.from({ length: STEPS }, (_, i) => Boolean(incoming[i]));
+              state.sequence[track.id] = Array.from({ length: state.steps }, (_, i) => Boolean(incoming[i]));
             });
           }
           if (payload.tempo) {
@@ -431,8 +460,10 @@
           if (payload.name) {
             els.trackName.value = payload.name;
           }
-          updateStatus(`загружено: ${payload.name || 'трек'}`);
+
+          buildGrid();
           renderGrid();
+          updateStatus(`проект загружен: ${payload.name || 'трек'}`);
         } catch {
           updateStatus('ошибка чтения сохранения');
         }
@@ -441,12 +472,10 @@
       function audioBufferToWavBlob(audioBuffer) {
         const numChannels = audioBuffer.numberOfChannels;
         const sampleRate = audioBuffer.sampleRate;
-        const format = 1;
         const bitDepth = 16;
-        const samples = audioBuffer.length;
         const blockAlign = (numChannels * bitDepth) / 8;
         const byteRate = sampleRate * blockAlign;
-        const dataSize = samples * blockAlign;
+        const dataSize = audioBuffer.length * blockAlign;
         const buffer = new ArrayBuffer(44 + dataSize);
         const view = new DataView(buffer);
 
@@ -461,7 +490,7 @@
         writeString(8, 'WAVE');
         writeString(12, 'fmt ');
         view.setUint32(16, 16, true);
-        view.setUint16(20, format, true);
+        view.setUint16(20, 1, true);
         view.setUint16(22, numChannels, true);
         view.setUint32(24, sampleRate, true);
         view.setUint32(28, byteRate, true);
@@ -470,15 +499,12 @@
         writeString(36, 'data');
         view.setUint32(40, dataSize, true);
 
-        const channelData = [];
-        for (let ch = 0; ch < numChannels; ch += 1) {
-          channelData.push(audioBuffer.getChannelData(ch));
-        }
-
+        const channels = Array.from({ length: numChannels }, (_, ch) => audioBuffer.getChannelData(ch));
         let offset = 44;
-        for (let i = 0; i < samples; i += 1) {
+
+        for (let i = 0; i < audioBuffer.length; i += 1) {
           for (let ch = 0; ch < numChannels; ch += 1) {
-            const sample = Math.max(-1, Math.min(1, channelData[ch][i]));
+            const sample = Math.max(-1, Math.min(1, channels[ch][i]));
             view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
             offset += 2;
           }
@@ -488,13 +514,15 @@
       }
 
       async function exportTrackWav() {
+        updateStatus('идет рендер WAV (3 мин), подождите...');
+
         const stepDuration = stepDurationMs() / 1000;
-        const loopDuration = STEPS * stepDuration;
+        const loopDuration = state.steps * stepDuration;
         const totalDuration = WAV_EXPORT_DURATION_SECONDS;
         const loopsToRender = Math.ceil(totalDuration / loopDuration);
-        const tail = 0.4;
-        const sampleRate = 32000;
-        const offlineCtx = new OfflineAudioContext(2, Math.ceil((totalDuration + tail) * sampleRate), sampleRate);
+        const tail = 0.5;
+        const frameCount = Math.ceil((totalDuration + tail) * WAV_SAMPLE_RATE);
+        const offlineCtx = new OfflineAudioContext(2, frameCount, WAV_SAMPLE_RATE);
 
         for (let loopIndex = 0; loopIndex < loopsToRender; loopIndex += 1) {
           const loopOffset = loopIndex * loopDuration;
@@ -508,9 +536,7 @@
               const gain = offlineCtx.createGain();
               osc.type = track.type;
               osc.frequency.value = track.freq;
-              gain.gain.setValueAtTime(0.001, start);
-              gain.gain.exponentialRampToValueAtTime(NOTE_VOLUME, start + NOTE_ATTACK);
-              gain.gain.exponentialRampToValueAtTime(0.001, start + NOTE_DECAY);
+              createNoteEnvelope(gain, start);
               osc.connect(gain);
               gain.connect(offlineCtx.destination);
               osc.start(start);
@@ -519,15 +545,18 @@
           });
         }
 
-        const renderedBuffer = await offlineCtx.startRendering();
-        const blob = audioBufferToWavBlob(renderedBuffer);
+        const rendered = await offlineCtx.startRendering();
+        const blob = audioBufferToWavBlob(rendered);
         const fileNameBase = (els.trackName.value.trim() || 'track').replace(/\s+/g, '_').toLowerCase();
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.href = url;
         link.download = `${fileNameBase}.wav`;
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(url);
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
         updateStatus(`аудио сохранено: ${link.download} (3 мин)`);
       }
 
@@ -535,6 +564,7 @@
         const payload = {
           name: els.trackName.value.trim() || 'Без названия',
           tempo: state.tempo,
+          steps: state.steps,
           sequence: state.sequence,
           exportedAt: new Date().toISOString(),
         };
@@ -543,8 +573,10 @@
         const link = document.createElement('a');
         link.href = url;
         link.download = `${payload.name.replace(/\s+/g, '_').toLowerCase() || 'track'}.json`;
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(url);
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         updateStatus(`экспортировано: ${link.download}`);
       }
 
@@ -561,6 +593,14 @@
           clearInterval(state.timerId);
           state.timerId = setInterval(tick, stepDurationMs());
         }
+      });
+
+      els.stepsCount.addEventListener('change', () => {
+        const nextSteps = Number(els.stepsCount.value);
+        resetSequence(nextSteps);
+        buildGrid();
+        renderGrid();
+        updateStatus(`количество шагов: ${nextSteps}`);
       });
 
       els.playBtn.addEventListener('click', startPlayback);
@@ -583,8 +623,9 @@
         renderGrid();
       });
 
-      buildGrid();
+      resetSequence(32);
       updateTempoDisplay();
+      buildGrid();
       renderGrid();
     </script>
   </body>
