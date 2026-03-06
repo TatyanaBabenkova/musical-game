@@ -215,7 +215,8 @@
 
           <div class="toolbar-group">
             <input id="trackName" type="text" placeholder="Название трека" value="Демо-трек" />
-            <button id="saveLocal">Сохранить</button>
+            <button id="saveAudio">Сохранить WAV</button>
+            <button id="saveProject">Сохранить проект</button>
             <button id="loadLocal">Загрузить</button>
             <button id="exportJson">Экспорт JSON</button>
           </div>
@@ -269,7 +270,8 @@
         playBtn: document.getElementById('playBtn'),
         recBtn: document.getElementById('recBtn'),
         stopBtn: document.getElementById('stopBtn'),
-        saveLocal: document.getElementById('saveLocal'),
+        saveAudio: document.getElementById('saveAudio'),
+        saveProject: document.getElementById('saveProject'),
         loadLocal: document.getElementById('loadLocal'),
         exportJson: document.getElementById('exportJson'),
         trackName: document.getElementById('trackName'),
@@ -431,6 +433,92 @@
         }
       }
 
+      function audioBufferToWavBlob(audioBuffer) {
+        const numChannels = audioBuffer.numberOfChannels;
+        const sampleRate = audioBuffer.sampleRate;
+        const format = 1;
+        const bitDepth = 16;
+        const samples = audioBuffer.length;
+        const blockAlign = (numChannels * bitDepth) / 8;
+        const byteRate = sampleRate * blockAlign;
+        const dataSize = samples * blockAlign;
+        const buffer = new ArrayBuffer(44 + dataSize);
+        const view = new DataView(buffer);
+
+        function writeString(offset, str) {
+          for (let i = 0; i < str.length; i += 1) {
+            view.setUint8(offset + i, str.charCodeAt(i));
+          }
+        }
+
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + dataSize, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, format, true);
+        view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, byteRate, true);
+        view.setUint16(32, blockAlign, true);
+        view.setUint16(34, bitDepth, true);
+        writeString(36, 'data');
+        view.setUint32(40, dataSize, true);
+
+        const channelData = [];
+        for (let ch = 0; ch < numChannels; ch += 1) {
+          channelData.push(audioBuffer.getChannelData(ch));
+        }
+
+        let offset = 44;
+        for (let i = 0; i < samples; i += 1) {
+          for (let ch = 0; ch < numChannels; ch += 1) {
+            const sample = Math.max(-1, Math.min(1, channelData[ch][i]));
+            view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+            offset += 2;
+          }
+        }
+
+        return new Blob([buffer], { type: 'audio/wav' });
+      }
+
+      async function exportTrackWav() {
+        const stepDuration = stepDurationMs() / 1000;
+        const trackLength = STEPS * stepDuration;
+        const tail = 0.3;
+        const sampleRate = 44100;
+        const offlineCtx = new OfflineAudioContext(2, Math.ceil((trackLength + tail) * sampleRate), sampleRate);
+
+        tracks.forEach((track) => {
+          state.sequence[track.id].forEach((isActive, step) => {
+            if (!isActive) return;
+            const start = step * stepDuration;
+            const osc = offlineCtx.createOscillator();
+            const gain = offlineCtx.createGain();
+            osc.type = track.type;
+            osc.frequency.value = track.freq;
+            gain.gain.setValueAtTime(0.001, start);
+            gain.gain.exponentialRampToValueAtTime(0.2, start + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.16);
+            osc.connect(gain);
+            gain.connect(offlineCtx.destination);
+            osc.start(start);
+            osc.stop(start + 0.18);
+          });
+        });
+
+        const renderedBuffer = await offlineCtx.startRendering();
+        const blob = audioBufferToWavBlob(renderedBuffer);
+        const fileNameBase = (els.trackName.value.trim() || 'track').replace(/\s+/g, '_').toLowerCase();
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `${fileNameBase}.wav`;
+        link.click();
+        URL.revokeObjectURL(url);
+        updateStatus(`аудио сохранено: ${link.download}`);
+      }
+
       function exportTrackJson() {
         const payload = {
           name: els.trackName.value.trim() || 'Без названия',
@@ -466,7 +554,10 @@
       els.playBtn.addEventListener('click', startPlayback);
       els.stopBtn.addEventListener('click', stopPlayback);
       els.recBtn.addEventListener('click', toggleRecording);
-      els.saveLocal.addEventListener('click', saveTrack);
+      els.saveAudio.addEventListener('click', () => {
+        exportTrackWav().catch(() => updateStatus('ошибка экспорта WAV'));
+      });
+      els.saveProject.addEventListener('click', saveTrack);
       els.loadLocal.addEventListener('click', loadTrack);
       els.exportJson.addEventListener('click', exportTrackJson);
 
