@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Музыкальная игра — мини-секвенсор</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f1117;
+        --panel: #1a1f2b;
+        --panel-soft: #232a3a;
+        --line: #313a4f;
+        --accent: #7c9bff;
+        --accent-2: #45d7c7;
+        --danger: #ff6b81;
+        --text: #e6e9f2;
+        --muted: #9aa3bd;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, #171d2d, var(--bg) 40%);
+        color: var(--text);
+        font-family: "Inter", "Segoe UI", sans-serif;
+      }
+
+      .app {
+        max-width: 1220px;
+        margin: 24px auto;
+        padding: 16px;
+      }
+
+      .panel {
+        background: rgba(26, 31, 43, 0.94);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+
+      .toolbar-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      button,
+      input,
+      select {
+        border: 1px solid var(--line);
+        background: var(--panel-soft);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 12px;
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        transition: 0.16s ease;
+      }
+
+      button:hover {
+        border-color: var(--accent);
+      }
+
+      button[data-state='active'] {
+        border-color: var(--accent-2);
+        box-shadow: 0 0 0 1px var(--accent-2) inset;
+      }
+
+      .primary {
+        background: linear-gradient(130deg, #3f63ff, #6f86ff);
+        border: 0;
+      }
+
+      .danger {
+        border-color: #7b3142;
+        color: #ffc1cc;
+      }
+
+      .tempo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tempo output {
+        min-width: 42px;
+        color: var(--accent-2);
+      }
+
+      .grid-wrap {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .grid-header,
+      .grid-row {
+        display: grid;
+        grid-template-columns: 180px repeat(16, minmax(24px, 1fr));
+      }
+
+      .grid-header {
+        background: #1b2231;
+      }
+
+      .grid-header div,
+      .grid-row > div {
+        border-right: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        min-height: 34px;
+      }
+
+      .grid-header .step {
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .track-label {
+        padding: 8px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .instrument-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .cell {
+        background: #171d2a;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .cell:nth-child(4n + 2) {
+        box-shadow: -1px 0 0 0 #4c5570 inset;
+      }
+
+      .cell.active {
+        background: linear-gradient(180deg, rgba(69, 215, 199, 0.28), rgba(69, 215, 199, 0.48));
+      }
+
+      .cell.playhead::after {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        border: 1px solid rgba(124, 155, 255, 0.9);
+        border-radius: 6px;
+      }
+
+      .meta {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .hint {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #8f99b6;
+      }
+
+      @media (max-width: 900px) {
+        .grid-header,
+        .grid-row {
+          grid-template-columns: 120px repeat(16, minmax(20px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel">
+        <div class="toolbar">
+          <div class="toolbar-group">
+            <button id="playBtn" class="primary">▶ Play</button>
+            <button id="recBtn">⏺ Rec</button>
+            <button id="stopBtn" class="danger">■ Stop</button>
+          </div>
+
+          <div class="toolbar-group tempo">
+            <label for="tempo">Темп:</label>
+            <input id="tempo" type="range" min="80" max="160" value="110" />
+            <output id="tempoValue">110</output>
+            <span>bpm</span>
+          </div>
+
+          <div class="toolbar-group">
+            <input id="trackName" type="text" placeholder="Название трека" value="Демо-трек" />
+            <button id="saveLocal">Сохранить</button>
+            <button id="loadLocal">Загрузить</button>
+            <button id="exportJson">Экспорт JSON</button>
+          </div>
+        </div>
+
+        <div class="grid-wrap">
+          <div class="grid-header" id="gridHeader"></div>
+          <div id="gridBody"></div>
+        </div>
+
+        <div class="meta">
+          <span id="status">Статус: готово</span>
+          <span id="barInfo">Текущий шаг: —</span>
+        </div>
+
+        <p class="hint">
+          По клику включается шаг. В режиме <strong>Rec</strong> можно нажимать цифры
+          <strong>1-6</strong>, чтобы записывать шаг в текущей позиции.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      const STEPS = 16;
+      const tracks = [
+        { id: 'drums', name: 'Ударные', color: '#f97316', freq: 90, type: 'square' },
+        { id: 'cymbals', name: 'Тарелки', color: '#facc15', freq: 1600, type: 'triangle' },
+        { id: 'guitar', name: 'Гитара', color: '#22c55e', freq: 220, type: 'sawtooth' },
+        { id: 'synth', name: 'Синтезатор', color: '#38bdf8', freq: 330, type: 'triangle' },
+        { id: 'brass', name: 'Духовые', color: '#a78bfa', freq: 260, type: 'square' },
+        { id: 'bass', name: 'Бас', color: '#ef4444', freq: 110, type: 'sine' },
+      ];
+
+      const state = {
+        tempo: 110,
+        currentStep: 0,
+        isPlaying: false,
+        isRecording: false,
+        timerId: null,
+        sequence: tracks.reduce((acc, track) => {
+          acc[track.id] = Array(STEPS).fill(false);
+          return acc;
+        }, {}),
+      };
+
+      const els = {
+        gridHeader: document.getElementById('gridHeader'),
+        gridBody: document.getElementById('gridBody'),
+        tempo: document.getElementById('tempo'),
+        tempoValue: document.getElementById('tempoValue'),
+        playBtn: document.getElementById('playBtn'),
+        recBtn: document.getElementById('recBtn'),
+        stopBtn: document.getElementById('stopBtn'),
+        saveLocal: document.getElementById('saveLocal'),
+        loadLocal: document.getElementById('loadLocal'),
+        exportJson: document.getElementById('exportJson'),
+        trackName: document.getElementById('trackName'),
+        status: document.getElementById('status'),
+        barInfo: document.getElementById('barInfo'),
+      };
+
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      function buildGrid() {
+        const headerCells = ['<div class="track-label">Инструмент</div>'];
+        for (let i = 1; i <= STEPS; i += 1) {
+          headerCells.push(`<div class="step">${i}</div>`);
+        }
+        els.gridHeader.innerHTML = headerCells.join('');
+
+        const rows = tracks
+          .map((track) => {
+            const label = `<div class="track-label"><span>${track.name}</span><span class="instrument-dot" style="background:${track.color}"></span></div>`;
+            const cells = Array.from({ length: STEPS }, (_, step) => {
+              return `<div class="cell" data-track="${track.id}" data-step="${step}"></div>`;
+            }).join('');
+            return `<div class="grid-row">${label}${cells}</div>`;
+          })
+          .join('');
+
+        els.gridBody.innerHTML = rows;
+      }
+
+      function updateStatus(text) {
+        els.status.textContent = `Статус: ${text}`;
+      }
+
+      function updateTempoDisplay() {
+        els.tempoValue.value = state.tempo;
+      }
+
+      function cellSelector(trackId, step) {
+        return `.cell[data-track="${trackId}"][data-step="${step}"]`;
+      }
+
+      function renderGrid() {
+        tracks.forEach((track) => {
+          state.sequence[track.id].forEach((value, step) => {
+            const cell = document.querySelector(cellSelector(track.id, step));
+            if (!cell) return;
+            cell.classList.toggle('active', value);
+            cell.classList.toggle('playhead', step === state.currentStep && state.isPlaying);
+          });
+        });
+        els.barInfo.textContent = state.isPlaying
+          ? `Текущий шаг: ${state.currentStep + 1} / ${STEPS}`
+          : 'Текущий шаг: —';
+      }
+
+      function playNote(track) {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = track.type;
+        osc.frequency.value = track.freq;
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+
+      function stepDurationMs() {
+        return (60_000 / state.tempo) / 4;
+      }
+
+      function tick() {
+        tracks.forEach((track) => {
+          if (state.sequence[track.id][state.currentStep]) {
+            playNote(track);
+          }
+        });
+        renderGrid();
+        state.currentStep = (state.currentStep + 1) % STEPS;
+      }
+
+      function startPlayback() {
+        if (state.isPlaying) return;
+        state.isPlaying = true;
+        audioCtx.resume();
+        tick();
+        state.timerId = setInterval(tick, stepDurationMs());
+        updateStatus(state.isRecording ? 'запись и воспроизведение' : 'воспроизведение');
+        els.playBtn.dataset.state = 'active';
+      }
+
+      function stopPlayback() {
+        state.isPlaying = false;
+        state.currentStep = 0;
+        clearInterval(state.timerId);
+        state.timerId = null;
+        els.playBtn.dataset.state = '';
+        renderGrid();
+        updateStatus(state.isRecording ? 'запись остановлена' : 'остановлено');
+      }
+
+      function toggleRecording() {
+        state.isRecording = !state.isRecording;
+        els.recBtn.dataset.state = state.isRecording ? 'active' : '';
+        updateStatus(state.isRecording ? 'режим записи включен' : 'режим записи выключен');
+      }
+
+      function toggleCell(trackId, step) {
+        state.sequence[trackId][step] = !state.sequence[trackId][step];
+        renderGrid();
+      }
+
+      function saveTrack() {
+        const payload = {
+          name: els.trackName.value.trim() || 'Без названия',
+          tempo: state.tempo,
+          sequence: state.sequence,
+          updatedAt: new Date().toISOString(),
+        };
+        localStorage.setItem('arm-kassira-track', JSON.stringify(payload));
+        updateStatus(`сохранено: ${payload.name}`);
+      }
+
+      function loadTrack() {
+        const raw = localStorage.getItem('arm-kassira-track');
+        if (!raw) {
+          updateStatus('не найден сохраненный трек');
+          return;
+        }
+
+        try {
+          const payload = JSON.parse(raw);
+          if (payload.sequence) {
+            tracks.forEach((track) => {
+              const incoming = payload.sequence[track.id] || [];
+              state.sequence[track.id] = Array.from({ length: STEPS }, (_, i) => Boolean(incoming[i]));
+            });
+          }
+          if (payload.tempo) {
+            state.tempo = Math.min(160, Math.max(80, Number(payload.tempo) || 110));
+            els.tempo.value = state.tempo;
+            updateTempoDisplay();
+            if (state.isPlaying) {
+              clearInterval(state.timerId);
+              state.timerId = setInterval(tick, stepDurationMs());
+            }
+          }
+          if (payload.name) {
+            els.trackName.value = payload.name;
+          }
+          updateStatus(`загружено: ${payload.name || 'трек'}`);
+          renderGrid();
+        } catch {
+          updateStatus('ошибка чтения сохранения');
+        }
+      }
+
+      function exportTrackJson() {
+        const payload = {
+          name: els.trackName.value.trim() || 'Без названия',
+          tempo: state.tempo,
+          sequence: state.sequence,
+          exportedAt: new Date().toISOString(),
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${payload.name.replace(/\s+/g, '_').toLowerCase() || 'track'}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        updateStatus(`экспортировано: ${link.download}`);
+      }
+
+      els.gridBody.addEventListener('click', (event) => {
+        const cell = event.target.closest('.cell');
+        if (!cell) return;
+        toggleCell(cell.dataset.track, Number(cell.dataset.step));
+      });
+
+      els.tempo.addEventListener('input', () => {
+        state.tempo = Number(els.tempo.value);
+        updateTempoDisplay();
+        if (state.isPlaying) {
+          clearInterval(state.timerId);
+          state.timerId = setInterval(tick, stepDurationMs());
+        }
+      });
+
+      els.playBtn.addEventListener('click', startPlayback);
+      els.stopBtn.addEventListener('click', stopPlayback);
+      els.recBtn.addEventListener('click', toggleRecording);
+      els.saveLocal.addEventListener('click', saveTrack);
+      els.loadLocal.addEventListener('click', loadTrack);
+      els.exportJson.addEventListener('click', exportTrackJson);
+
+      document.addEventListener('keydown', (event) => {
+        if (!state.isRecording) return;
+        const index = Number(event.key) - 1;
+        if (Number.isNaN(index) || index < 0 || index >= tracks.length) return;
+        const track = tracks[index];
+        state.sequence[track.id][state.currentStep] = true;
+        playNote(track);
+        renderGrid();
+      });
+
+      buildGrid();
+      updateTempoDisplay();
+      renderGrid();
+    </script>
+  </body>
+</html>
