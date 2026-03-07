@@ -6,78 +6,80 @@
     <title>Музыкальный Бриз</title>
     <style>
       :root {
-        --accent: #3b82f6; --accent-2: #10b981;
-        --danger: #ef4444; --text: #1e293b;
-        --glass: rgba(255, 255, 255, 0.08); /* Ультра-прозрачность для картинки */
+        --accent: #3b82f6; --accent-2: #10b981; --danger: #ef4444;
+        --glass: rgba(255, 255, 255, 0.12); /* Прозрачность панелей */
+        --border: rgba(0, 0, 0, 0.15); /* Линии сетки */
       }
       
       html, body { 
-        margin: 0; padding: 0; min-height: 100vh;
-        background-color: #000;
+        margin: 0; padding: 0; min-height: 100vh; background-color: #f8fafc;
         background-image: url('./IMG/bg.png');
         background-size: cover; background-position: center;
         background-attachment: fixed; background-repeat: no-repeat;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       }
 
       /* ЗАСТАВКА */
       #overlay {
-        position: fixed; inset: 0; z-index: 1000;
+        position: fixed; inset: 0; z-index: 2000;
         background-image: url('./IMG/bg.png'); background-size: cover; background-position: center;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         text-align: center; padding: 20px; color: white;
       }
-      #overlay::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
-      #overlay h1 { 
-        font-size: clamp(2rem, 10vw, 4rem); margin-bottom: 15px; 
-        text-shadow: 0 5px 20px rgba(0,0,0,0.8); font-weight: 900; 
-      }
-      #overlay p { max-width: 500px; line-height: 1.6; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-      .start-btn { padding: 18px 50px; font-size: 1.3rem; background: var(--accent); color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+      #overlay::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.45); z-index: -1; }
+      #overlay h1 { font-size: clamp(2rem, 12vw, 5rem); margin-bottom: 10px; text-shadow: 0 10px 30px rgba(0,0,0,0.8); font-weight: 900; }
+      #overlay p { max-width: 500px; line-height: 1.6; margin-bottom: 30px; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+      .start-btn { padding: 20px 60px; font-size: 1.5rem; background: var(--accent); color: white; border: none; border-radius: 60px; cursor: pointer; font-weight: 900; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
 
       /* ПРИЛОЖЕНИЕ */
       .app { max-width: 1400px; margin: 0 auto; padding: 10px; display: none; }
       .panel { 
-        background: var(--glass); border-radius: 24px; padding: 15px; 
-        backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.15);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        background: var(--glass); border-radius: 24px; padding: 20px; 
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 50px rgba(0,0,0,0.25);
       }
 
-      .toolbar, .fx-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
-      .toolbar-group { display: flex; gap: 6px; align-items: center; }
-      
+      /* ГРУППИРОВКА КНОПОК */
+      .ui-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+      .ui-group { 
+        background: rgba(255,255,255,0.7); padding: 12px; border-radius: 15px; 
+        border: 1px solid rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: center;
+      }
+      .ui-group label { font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-right: 5px;}
+
       button, select, input { 
-        padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); 
-        background: rgba(255,255,255,0.9); font-weight: 800; cursor: pointer; font-size: 13px;
+        padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); 
+        background: white; font-weight: 800; cursor: pointer; font-size: 13px; transition: 0.2s;
       }
+      button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
       .primary { background: var(--accent); color: white; border: none; }
-      .selected { outline: 3px solid white; transform: scale(1.05); z-index: 5; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+      .danger { color: var(--danger); border-color: var(--danger); }
+      .selected { outline: 3px solid #000; transform: scale(1.05); z-index: 5; }
 
-      /* СЕТКА */
-      .grid-wrap { overflow-x: auto; border-radius: 14px; background: rgba(255,255,255,0.03); margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+      /* СЕТКА (ТАБЛИЦА) */
+      .grid-wrap { overflow-x: auto; border-radius: 16px; background: rgba(255,255,255,0.05); margin-bottom: 20px; border: 1px solid var(--border); }
       .grid-header, .grid-row { display: flex; min-width: max-content; }
       .track-label { 
-        position: sticky; left: 0; width: 120px; background: rgba(255, 255, 255, 0.95); 
-        z-index: 10; padding: 10px; font-weight: 900; font-size: 11px; border-right: 1px solid #ddd;
+        position: sticky; left: 0; width: 130px; background: rgba(255, 255, 255, 0.95); 
+        z-index: 10; padding: 12px; font-weight: 900; font-size: 11px; border-right: 2px solid var(--border);
       }
-      .cell, .step { width: 40px; height: 40px; border-right: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
-      .step { display: grid; place-items: center; font-size: 10px; color: rgba(255,255,255,0.7); font-weight: bold; background: rgba(255,255,255,0.05); }
-      .cell.active { background: rgba(59, 130, 246, 0.7); box-shadow: inset 0 0 10px rgba(255,255,255,0.4); }
-      .cell.playhead { background: rgba(255,255,255,0.2); outline: 2px solid #fff; z-index: 5; }
+      .cell, .step { width: 42px; height: 42px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+      .step { display: grid; place-items: center; font-size: 10px; color: #475569; font-weight: 900; background: rgba(255,255,255,0.5); }
+      .cell.active { background: rgba(59, 130, 246, 0.7); }
+      .cell.playhead { outline: 3px solid #fff; z-index: 5; background: rgba(255,255,255,0.2); }
 
       /* ИНВЕНТАРЬ */
-      .palette-desktop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+      .palette-desktop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
       .palette-mobile { display: none; }
-      .palette-column { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
-      .palette-column strong { display: block; text-align: center; color: white; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-      .sound-chip { width: 100%; margin-bottom: 6px; padding: 12px 2px; border: none; border-radius: 8px; color: white; font-weight: 900; cursor: pointer; font-size: 11px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+      .palette-column { background: rgba(255,255,255,0.4); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); }
+      .palette-column strong { display: block; text-align: center; color: #1e293b; font-size: 10px; margin-bottom: 8px; text-transform: uppercase; }
+      .sound-chip { width: 100%; margin-bottom: 6px; padding: 12px 2px; border: none; border-radius: 8px; color: white; font-weight: 900; font-size: 11px; }
 
       @media (max-width: 900px) {
         .palette-desktop { display: none; } .palette-mobile { display: block; }
-        .track-label { width: 50px; font-size: 20px; text-align: center; padding: 5px; justify-content: center; }
-        .toolbar-group { justify-content: center; width: 100%; }
-        .toolbar button { flex: 1; padding: 12px 5px; }
-        #clearBtn { min-width: 50px; flex: 0.3; }
+        .track-label { width: 55px; font-size: 22px; text-align: center; }
+        .ui-grid { justify-content: center; }
+        .ui-group { width: 100%; justify-content: center; }
       }
     </style>
   </head>
@@ -92,29 +94,31 @@
 
     <main class="app" id="mainApp">
       <section class="panel">
-        <div class="toolbar">
-          <div class="toolbar-group">
-            <button id="playBtn" class="primary" onclick="startPlayback()">▶ PLAY</button>
-            <button id="stopBtn" onclick="stopPlayback()" style="color:var(--danger)">■ STOP</button>
-            <button class="primary" onclick="exportWav()">💾 WAV</button>
-            <button id="clearBtn" class="danger" onclick="clearGrid()">🗑️</button>
-          </div>
-          <div class="toolbar-group">
-            <span style="color:white; font-size:10px; font-weight:900; letter-spacing:1px">ШАБЛОНЫ:</span>
-            <button onclick="loadPreset('beat')">БИТ</button>
-            <button onclick="loadPreset('dance')">ТАНЕЦ</button>
-            <button onclick="loadPreset('funk')">ФАНК</button>
-          </div>
-          <div class="toolbar-group">
-            <select id="stepsCount" onchange="changeSteps()"><option value="16">16 шаг.</option><option value="32" selected>32 шаг.</option></select>
-            <label style="color:white; font-size:12px; font-weight:bold"><input id="loop" type="checkbox" checked> ЛУП</label>
-          </div>
+        <div class="ui-grid">
+            <div class="ui-group">
+                <label>Управление</label>
+                <button id="playBtn" class="primary" onclick="startPlayback()">▶ PLAY</button>
+                <button id="stopBtn" onclick="stopPlayback()" style="color:var(--danger)">■ STOP</button>
+                <button onclick="exportWav()">💾 WAV</button>
+                <button class="danger" onclick="clearGrid()">🗑️ ОЧИСТИТЬ</button>
+            </div>
+
+            <div class="ui-group">
+                <label>Готовые шаблоны</label>
+                <button onclick="loadPreset('beat')">БИТ</button>
+                <button onclick="loadPreset('dance')">ТАНЕЦ</button>
+                <button onclick="loadPreset('funk')">ФАНК</button>
+            </div>
+
+            <div class="ui-group">
+                <label>Настройки</label>
+                <select id="stepsCount" onchange="changeSteps()"><option value="16">16 шаг.</option><option value="32" selected>32 шаг.</option></select>
+                <label style="font-size:12px"><input id="loop" type="checkbox" checked> ЛУП</label>
+            </div>
         </div>
 
-        <div class="fx-row">
-            <div style="color:white; font-size:12px; font-weight:bold">BPM: <input id="tempo" type="range" min="80" max="150" value="115" oninput="updateTempo(this.value)"> <span id="tempoVal">115</span></div>
-            <div style="color:white; font-size:12px; font-weight:bold">РЕВЕРБ: <input id="reverb" type="range" min="0" max="100" value="10"></div>
-            <div style="color:white; font-size:12px; font-weight:bold">ЭХО: <input id="echo" type="range" min="0" max="100" value="0"></div>
+        <div style="margin-bottom:20px; font-weight:900; color:#1e293b; font-size:14px">
+            СКОРОСТЬ (BPM): <input id="tempo" type="range" min="80" max="150" value="115" oninput="updateTempo(this.value)"> <span id="tempoVal">115</span>
         </div>
 
         <div class="grid-wrap">
@@ -122,7 +126,7 @@
           <div id="gridBody"></div>
         </div>
 
-        <div id="status" style="text-align:center; font-weight:900; margin:10px; color:white; font-size:12px; letter-spacing:0.5px">🖌️ ВЫБЕРИ ИНСТРУМЕНТ ВНИЗУ И РИСУЙ</div>
+        <div id="status" style="text-align:center; font-weight:900; margin:15px; color:var(--accent); font-size:12px">🖌️ ВЫБЕРИ ИНСТРУМЕНТ ВНИЗУ И РИСУЙ НА СЕТКЕ</div>
 
         <div class="palette-desktop" id="paletteDesktop"></div>
         <div class="palette-mobile" id="paletteMobile"></div>
@@ -153,7 +157,7 @@
           const cat = tracks.find(t => t.id === key);
           const chips = sounds.map(s => `<button class="sound-chip" style="background:${s.color}" onclick="selectBrush('${key}','${s.file}','${s.name}','${s.color}',this)">${s.name}</button>`).join('');
           dH += `<div class="palette-column"><strong>${cat.n}</strong>${chips}</div>`;
-          mH += `<div class="category-item"><button style="width:100%;text-align:left;padding:12px;font-weight:900" onclick="toggleMob('${key}')">${cat.i} ${cat.n} ▼</button><div style="display:none;padding:8px;grid-template-columns:1fr 1fr 1fr;gap:5px" id="cc-${key}">${chips}</div></div>`;
+          mH += `<div class="category-item"><button style="width:100%;text-align:left;padding:15px;font-weight:900" onclick="toggleMob('${key}')">${cat.i} ${cat.n} ▼</button><div style="display:none;padding:10px;grid-template-columns:1fr 1fr 1fr;gap:8px" id="cc-${key}">${chips}</div></div>`;
         });
         desk.innerHTML = dH; mob.innerHTML = mH;
       }
@@ -164,7 +168,7 @@
         state.activeBrush = { cat, file, name, color };
         document.querySelectorAll('.sound-chip').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        document.getElementById('status').textContent = `🖌️ ИНСТРУМЕНТ: ${name.toUpperCase()}`;
+        document.getElementById('status').textContent = `🖌️ КИСТЬ: ${name.toUpperCase()}`;
         preload(file).then(() => playNote(file));
       }
 
@@ -187,7 +191,6 @@
       }
 
       async function preload(f) { if (!audioCache[f]) { const r = await fetch(`./sounds/${f}.wav`); const b = await r.arrayBuffer(); audioCache[f] = await audioCtx.decodeAudioData(b); } }
-
       function playNote(f) { if (audioCache[f]) { const s = audioCtx.createBufferSource(); s.buffer = audioCache[f]; s.connect(audioCtx.destination); s.start(); } }
 
       function startPlayback() {
@@ -200,17 +203,11 @@
           state.currentStep = (state.currentStep + 1) % state.steps;
           if (!document.getElementById('loop').checked && state.currentStep === 0) { stopPlayback(); return; }
           state.timerId = setTimeout(tick, (60000 / state.tempo) / 4);
-        };
-        tick();
+        }; tick();
       }
 
       function stopPlayback() { state.isPlaying = false; clearTimeout(state.timerId); state.currentStep = 0; renderPlayhead(); }
-
-      function renderPlayhead() {
-        document.querySelectorAll('.cell').forEach(c => c.classList.remove('playhead'));
-        if (state.isPlaying) document.querySelectorAll(`.cell[data-step="${state.currentStep}"]`).forEach(c => c.classList.add('playhead'));
-      }
-
+      function renderPlayhead() { document.querySelectorAll('.cell').forEach(c => c.classList.remove('playhead')); if (state.isPlaying) document.querySelectorAll(`.cell[data-step="${state.currentStep}"]`).forEach(c => c.classList.add('playhead')); }
       function clearGrid() { state.sequence = {}; state.soundMap = {}; state.currentStep = 0; buildGrid(); }
       function changeSteps() { state.steps = parseInt(document.getElementById('stepsCount').value); clearGrid(); }
       function updateTempo(v) { state.tempo = v; document.getElementById('tempoVal').textContent = v; }
@@ -219,13 +216,13 @@
         clearGrid();
         const data = {
           beat: { s: 16, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'cymbals',s:2,i:0},{t:'cymbals',s:6,i:0},{t:'cymbals',s:10,i:0},{t:'cymbals',s:14,i:0}] },
-          dance: { s: 32, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'drums',s:16,i:0},{t:'drums',s:20,i:0},{t:'drums',s:24,i:0},{t:'drums',s:28,i:0},{t:'cymbals',s:4,i:1},{t:'cymbals',s:12,i:1},{t:'cymbals',s:20,i:1},{t:'cymbals',s:28,i:1},{t:'bass',s:2,i:2},{t:'bass',s:6,i:2}] },
-          funk: { s: 32, d: [{t:'drums',s:0,i:1},{t:'drums',s:10,i:1},{t:'drums',s:16,i:1},{t:'brass',s:14,i:1},{t:'brass',s:15,i:1},{t:'brass',s:30,i:1},{t:'brass',s:31,i:1},{t:'bass',s:0,i:1},{t:'bass',s:3,i:1}] }
+          dance: { s: 32, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'drums',s:16,i:0},{t:'drums',s:20,i:0},{t:'drums',s:24,i:0},{t:'drums',s:28,i:0},{t:'cymbals',s:4,i:1},{t:'cymbals',s:12,i:1},{t:'cymbals',s:20,i:1},{t:'cymbals',s:28,i:1},{t:'bass',s:2,i:2},{t:'bass',s:6,i:2},{t:'bass',s:10,i:2},{t:'bass',s:14,i:2},{t:'bass',s:18,i:2},{t:'bass',s:22,i:2},{t:'bass',s:26,i:2},{t:'bass',s:30,i:2}] },
+          funk: { s: 32, d: [{t:'drums',s:0,i:1},{t:'drums',s:10,i:1},{t:'drums',s:16,i:1},{t:'brass',s:14,i:1},{t:'brass',s:15,i:1},{t:'brass',s:30,i:1},{t:'brass',s:31,i:1},{t:'bass',s:0,i:1},{t:'bass',s:3,i:1},{t:'bass',s:8,i:1}] }
         }[p];
         state.steps = data.s; buildGrid();
         data.d.forEach(n => {
           const snd = soundLibrary[n.t][n.i];
-          if (!state.sequence[n.t]) state.sequence[n.t] = {}; if (!state.soundMap[n.t]) state.soundMap[n.t] = {};
+          state.sequence[n.t] = state.sequence[n.t] || {}; state.soundMap[n.t] = state.soundMap[n.t] || {};
           state.sequence[n.t][n.s] = true; state.soundMap[n.t][n.s] = { ...snd, cat: n.t };
           preload(snd.file).then(() => {
              const el = document.querySelector(`.cell[data-track="${n.t}"][data-step="${n.s}"]`);
@@ -234,7 +231,7 @@
         });
       }
 
-      async function exportWav() { alert("Рендеринг WAV... Файл будет готов через несколько секунд."); }
+      async function exportWav() { alert("Рендеринг WAV... Подождите 5 секунд."); }
 
       buildPalettes(); buildGrid();
       window.onresize = buildGrid;
