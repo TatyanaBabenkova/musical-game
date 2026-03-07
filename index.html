@@ -7,10 +7,10 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f0f4f8; 
-        /* Делаем панели чуть прозрачными, чтобы фон красиво просвечивал */
-        --panel: rgba(255, 255, 255, 0.92); 
-        --panel-soft: rgba(248, 250, 252, 0.85);
+        --bg: #e2e8f0; 
+        /* Полупрозрачные панели, чтобы фон красиво просвечивал */
+        --panel: rgba(255, 255, 255, 0.88); 
+        --panel-soft: rgba(248, 250, 252, 0.75);
         --line: #cbd5e1; --accent: #3b82f6; --accent-2: #10b981;
         --danger: #ef4444; --text: #1e293b; --muted: #64748b;
       }
@@ -18,27 +18,27 @@
       
       body { margin: 0; background-color: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; }
       
-      /* --- НАДЕЖНЫЙ ФОНОВЫЙ СЛОЙ --- */
+      /* --- НАДЕЖНЫЙ СЛОЙ КАРТИНКИ --- */
       .app-background {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('./img/bg.png'); /* ФАЙЛ PNG */
+        background-image: url('bg.png'); /* ФАЙЛ ДОЛЖЕН БЫТЬ bg.png маленькими буквами! */
         background-size: cover; 
         background-position: center;
         background-repeat: no-repeat;
-        /* Если картинка слишком бледная, увеличьте до 0.3 или 0.4. Если яркая - 0.05 */
-        opacity: 0.15; 
-        z-index: -1; /* Прячем позади игры */
-        pointer-events: none; /* Чтобы не перекрывала клики */
+        opacity: 0.3; /* Видимость картинки 30% */
+        z-index: -10; /* Спрятано глубоко на фон */
+        pointer-events: none; 
       }
       /* ----------------------- */
 
-      .app { max-width: 1540px; margin: 20px auto; padding: 14px; position: relative; z-index: 1;}
-      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px); }
-      .toolbar, .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-      .toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      /* УЖИМАЕМ РАЗМЕРЫ ДЛЯ ЭКРАНА НОУТБУКА */
+      .app { max-width: 1500px; margin: 10px auto; padding: 10px; position: relative; z-index: 1;}
+      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); backdrop-filter: blur(8px); }
+      .toolbar, .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+      .toolbar-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
       
-      button, input, select { border: 1px solid var(--line); background: #ffffff; color: var(--text); border-radius: 10px; padding: 8px 14px; font: inherit; transition: all 0.2s; }
+      button, input, select { border: 1px solid var(--line); background: #ffffff; color: var(--text); border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 13px; transition: all 0.2s; }
       button { cursor: pointer; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
       button:hover { border-color: var(--accent); background: #f1f5f9; }
       button[data-state='active'] { border-color: var(--accent-2); background: #ecfdf5; color: #065f46; box-shadow: 0 0 0 1px var(--accent-2) inset; }
@@ -46,40 +46,44 @@
       .primary { background: #3b82f6; color: white; border: 0; }
       .primary:hover { background: #2563eb; color: white; }
       .danger { border-color: #ef4444; color: #b91c1c; }
+      .preset-btn { background: #f8fafc; border-color: #94a3b8; color: #334155; font-weight: 600;}
+      .preset-btn:hover { background: #e2e8f0; }
       
-      .tempo, .fx-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;}
-      .tempo output, .fx-item output { min-width: 30px; color: var(--accent); font-weight: bold;}
+      .tempo, .fx-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;}
+      .tempo output, .fx-item output { min-width: 25px; color: var(--accent); font-weight: bold;}
       
-      .grid-wrap { border: 1px solid var(--line); border-radius: 14px; overflow: auto; max-height: 55vh; background: var(--panel-soft); backdrop-filter: blur(5px); }
-      .grid-header, .grid-row { display: grid; grid-template-columns: 200px repeat(var(--steps), minmax(30px, 1fr)); min-width: max-content; }
+      /* Сетка стала компактнее */
+      .grid-wrap { border: 1px solid var(--line); border-radius: 10px; overflow: auto; max-height: 45vh; background: var(--panel-soft); backdrop-filter: blur(4px); }
+      .grid-header, .grid-row { display: grid; grid-template-columns: 160px repeat(var(--steps), minmax(24px, 1fr)); min-width: max-content; }
       .grid-header { position: sticky; top: 0; z-index: 2; background: rgba(226, 232, 240, 0.95); backdrop-filter: blur(4px); }
-      .grid-header div, .grid-row > div { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 40px; }
-      .grid-header .step { display: grid; place-items: center; font-size: 12px; color: var(--muted); font-weight: bold;}
+      .grid-header div, .grid-row > div { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 32px; }
+      .grid-header .step { display: grid; place-items: center; font-size: 11px; color: var(--muted); font-weight: bold;}
       
-      .track-label { padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; background: rgba(248, 250, 252, 0.8); }
-      .instrument-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 1px 3px rgba(0,0,0,0.2);}
+      .track-label { padding: 4px 8px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; background: rgba(248, 250, 252, 0.8); }
+      .instrument-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.2);}
       
-      .cell { background: rgba(255, 255, 255, 0.6); cursor: pointer; position: relative; transition: background 0.1s;}
-      .cell.bar-start { box-shadow: -2px 0 0 0 rgba(226, 232, 240, 0.8) inset; }
+      .cell { background: rgba(255, 255, 255, 0.5); cursor: pointer; position: relative; transition: background 0.1s;}
+      .cell.bar-start { box-shadow: -2px 0 0 0 rgba(203, 213, 225, 0.8) inset; }
       .cell:hover { background: rgba(241, 245, 249, 0.8); }
       .cell.active { background: rgba(224, 242, 254, 0.9); }
-      .cell.playhead::after { content: ''; position: absolute; inset: 0; border: 2px solid rgba(59, 130, 246, 0.8); background: rgba(59, 130, 246, 0.1); pointer-events: none; }
+      .cell.playhead::after { content: ''; position: absolute; inset: 0; border: 2px solid rgba(59, 130, 246, 0.8); background: rgba(59, 130, 246, 0.15); pointer-events: none; }
       .cell.error-shake { background: #fee2e2; }
       
-      .cell-content { position: absolute; inset: 2px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: bold; overflow: hidden; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+      .cell-content { position: absolute; inset: 1px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; font-weight: bold; overflow: hidden; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
       
-      .meta { margin-top: 15px; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; font-weight: 500; }
+      .meta { margin-top: 8px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; font-weight: 500; }
       #status { transition: color 0.3s; }
       #status.error { color: var(--danger); font-weight: bold; }
-      .hint { margin-top: 5px; font-size: 13px; color: #3b82f6; background: rgba(239, 246, 255, 0.85); padding: 10px; border-radius: 8px;}
+      .hint { margin-top: 4px; font-size: 12px; color: #2563eb; background: rgba(239, 246, 255, 0.85); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px;}
       
-      .palette { margin-top: 20px; border-top: 2px dashed var(--line); padding-top: 15px; }
-      .palette h3 { margin: 0 0 12px; font-size: 16px; color: var(--text); }
-      .palette-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-      .palette-col { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--panel-soft); }
-      .palette-col strong { display: block; margin-bottom: 10px; font-size: 13px; color: var(--text); text-align: center; text-transform: uppercase; letter-spacing: 0.5px;}
+      /* Нижняя панель тоже ужата */
+      .palette { margin-top: 10px; border-top: 2px dashed var(--line); padding-top: 10px; }
+      .palette h3 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+      .palette-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+      .palette-col { border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: rgba(248, 250, 252, 0.8); }
+      .palette-col strong { display: block; margin-bottom: 6px; font-size: 11px; color: var(--text); text-align: center; text-transform: uppercase; letter-spacing: 0.5px;}
       
-      .sound-chip { border: none; border-radius: 6px; padding: 8px 6px; margin-bottom: 8px; font-size: 12px; cursor: grab; color: white; font-weight: 600; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: transform 0.1s; text-shadow: 0 1px 1px rgba(0,0,0,0.3); }
+      .sound-chip { border: none; border-radius: 4px; padding: 6px 4px; margin-bottom: 6px; font-size: 11px; cursor: grab; color: white; font-weight: 600; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: transform 0.1s; text-shadow: 0 1px 1px rgba(0,0,0,0.3); }
       .sound-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
       .sound-chip:active { transform: scale(0.95); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
     </style>
@@ -95,16 +99,24 @@
             <button id="stopBtn" class="danger">■ Stop</button>
             <button id="saveAudio" class="primary">💾 Скачать WAV</button>
           </div>
+          
           <div class="toolbar-group">
-            <label for="stepsCount">Длина:</label>
+            <span style="font-size: 12px; font-weight: bold; color: var(--muted);">Шаблоны:</span>
+            <button class="preset-btn" onclick="loadPreset('beat')">Прямой бит</button>
+            <button class="preset-btn" onclick="loadPreset('synth')">Синт-вейв</button>
+            <button class="preset-btn" onclick="loadPreset('funk')">Фанк</button>
+            <button class="preset-btn danger" onclick="clearGrid()">🗑️ Очистить</button>
+          </div>
+
+          <div class="toolbar-group">
+            <label for="stepsCount" style="font-size: 13px;">Длина:</label>
             <select id="stepsCount">
-              <option value="16">16 шагов</option>
-              <option value="32" selected>32 шага</option>
-              <option value="64">64 шага</option>
+              <option value="16">16</option>
+              <option value="32" selected>32</option>
+              <option value="64">64</option>
             </select>
-            <input id="trackName" type="text" placeholder="Мой Хит" value="Мой Хит" />
-            <button id="saveProject">Сохранить проект</button>
-            <button id="loadLocal">Загрузить проект</button>
+            <button id="saveProject">Сохранить</button>
+            <button id="loadLocal">Загрузить</button>
           </div>
         </div>
 
@@ -127,9 +139,10 @@
             <input id="echo" type="range" min="0" max="70" value="0" />
             <output id="echoValue">0</output>
           </div>
+          <input id="trackName" type="text" placeholder="Название трека" value="Мой Хит" style="width: 150px;"/>
         </div>
 
-        <p class="hint">💡 <b>Инструкция:</b> Кликните по инструменту внизу, чтобы послушать его. Перетаскивайте инструменты из инвентаря на сетку. Клик по ячейке сетки удалит звук.</p>
+        <p class="hint">💡 <b>Инструкция:</b> Выберите готовый шаблон или перетаскивайте кубики инструментов из инвентаря на сетку. Клик по ячейке удаляет звук.</p>
 
         <div class="grid-wrap">
           <div class="grid-header" id="gridHeader"></div>
@@ -192,6 +205,39 @@
         { id: 'brass', name: 'Духовые', color: '#a855f7' },
         { id: 'bass', name: 'Басс', color: '#ef4444' },
       ];
+
+      // --- ГОТОВЫЕ ШАБЛОНЫ МЕЛОДИЙ ---
+      const appPresets = {
+        beat: {
+          name: "Прямой бит", tempo: 115, steps: 16,
+          data: [
+            {t: 'drums', s: 0, i: 0}, {t: 'drums', s: 4, i: 0}, {t: 'drums', s: 8, i: 0}, {t: 'drums', s: 12, i: 0},
+            {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, 
+            {t: 'cymbals', s: 2, i: 0}, {t: 'cymbals', s: 6, i: 0}, {t: 'cymbals', s: 10, i: 0}, {t: 'cymbals', s: 14, i: 0},
+            {t: 'bass', s: 0, i: 0}, {t: 'bass', s: 8, i: 0}
+          ]
+        },
+        synth: {
+          name: "Синт-вейв", tempo: 100, steps: 32,
+          data: [
+            {t: 'drums', s: 0, i: 0}, {t: 'drums', s: 8, i: 0}, {t: 'drums', s: 16, i: 0}, {t: 'drums', s: 24, i: 0},
+            {t: 'cymbals', s: 8, i: 1}, {t: 'cymbals', s: 24, i: 1},
+            {t: 'synth', s: 0, i: 1}, {t: 'synth', s: 6, i: 1}, {t: 'synth', s: 16, i: 1}, {t: 'synth', s: 22, i: 1},
+            {t: 'bass', s: 0, i: 2}, {t: 'bass', s: 4, i: 2}, {t: 'bass', s: 8, i: 2}, {t: 'bass', s: 12, i: 2}, {t: 'bass', s: 16, i: 2}, {t: 'bass', s: 20, i: 2}, {t: 'bass', s: 24, i: 2}, {t: 'bass', s: 28, i: 2}
+          ]
+        },
+        funk: {
+          name: "Фанк", tempo: 105, steps: 32,
+          data: [
+            {t: 'drums', s: 0, i: 1}, {t: 'drums', s: 10, i: 1}, {t: 'drums', s: 16, i: 1}, {t: 'drums', s: 26, i: 1},
+            {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
+            {t: 'cymbals', s: 0, i: 2}, {t: 'cymbals', s: 8, i: 2}, {t: 'cymbals', s: 16, i: 2}, {t: 'cymbals', s: 24, i: 2}, 
+            {t: 'guitar', s: 4, i: 2}, {t: 'guitar', s: 12, i: 2}, {t: 'guitar', s: 20, i: 2}, {t: 'guitar', s: 28, i: 2},
+            {t: 'brass', s: 14, i: 1}, {t: 'brass', s: 30, i: 1},
+            {t: 'bass', s: 0, i: 1}, {t: 'bass', s: 3, i: 1}, {t: 'bass', s: 8, i: 1}, {t: 'bass', s: 16, i: 1}, {t: 'bass', s: 19, i: 1}, {t: 'bass', s: 24, i: 1}
+          ]
+        }
+      };
 
       const state = { steps: 32, tempo: 110, currentStep: 0, isPlaying: false, timerId: null, loopEnabled: true, fx: { reverb: 10, echo: 0 }, sequence: {}, soundMap: {} };
 
@@ -288,6 +334,39 @@
             els.status.textContent = `✅ Добавлен: ${sound.name} на шаг ${step + 1}`;
           });
         });
+      }
+
+      // --- ЛОГИКА ШАБЛОНОВ ---
+      function clearGrid() {
+        tracks.forEach(t => { state.sequence[t.id] = Array(state.steps).fill(false); state.soundMap[t.id] = Array(state.steps).fill(null); });
+        renderGrid(); els.status.textContent = 'Сетка очищена';
+      }
+
+      window.loadPreset = function(presetKey) {
+        const p = appPresets[presetKey];
+        if(!p) return;
+        
+        stopPlayback();
+        els.stepsCount.value = p.steps;
+        resetSequence(p.steps);
+        buildGrid();
+        
+        state.tempo = p.tempo;
+        els.tempo.value = p.tempo;
+        els.tempoValue.value = p.tempo;
+        
+        clearGrid();
+        
+        p.data.forEach(note => {
+            const soundData = soundLibrary[note.t][note.i];
+            const fullSound = { ...soundData, category: note.t };
+            state.sequence[note.t][note.s] = true;
+            state.soundMap[note.t][note.s] = fullSound;
+            preloadAudioFile(fullSound.file);
+        });
+        
+        renderGrid();
+        els.status.textContent = `✅ Загружен шаблон: ${p.name}`;
       }
 
       function renderGrid() {
