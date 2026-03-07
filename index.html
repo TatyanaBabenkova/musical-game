@@ -61,7 +61,8 @@
       
       .sound-chip { border: none; border-radius: 6px; padding: 8px 6px; margin-bottom: 8px; font-size: 12px; cursor: grab; color: white; font-weight: 600; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: transform 0.1s; text-shadow: 0 1px 1px rgba(0,0,0,0.3); }
       .sound-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-      .sound-chip:active { cursor: grabbing; }
+      /* Эффект нажатия (тап/клик) */
+      .sound-chip:active { transform: scale(0.95); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
     </style>
   </head>
   <body>
@@ -107,7 +108,7 @@
           </div>
         </div>
 
-        <p class="hint">💡 <b>Инструкция:</b> Перетаскивайте инструменты из инвентаря на сетку. Внимание: барабаны можно ставить только на дорожку "Ударные", гитару — к гитарам и т.д.</p>
+        <p class="hint">💡 <b>Инструкция:</b> Кликните по инструменту внизу, чтобы послушать его. Перетаскивайте инструменты из инвентаря на сетку. Клик по ячейке сетки удалит звук.</p>
 
         <div class="grid-wrap">
           <div class="grid-header" id="gridHeader"></div>
@@ -224,7 +225,28 @@
           const chips = sounds.map((s) => `<div class="sound-chip" style="background:${s.color}" draggable="true" data-sound='${JSON.stringify({ ...s, category: cat })}'>${s.name}</div>`).join('');
           return `<div class="palette-col"><strong>${catNames[cat]}</strong>${chips}</div>`;
         }).join('');
-        els.palette.querySelectorAll('.sound-chip').forEach(chip => chip.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', chip.dataset.sound)));
+        
+        // Добавляем предпрослушивание и drag-and-drop
+        els.palette.querySelectorAll('.sound-chip').forEach(chip => {
+          // Логика перетаскивания
+          chip.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', chip.dataset.sound));
+          
+          // Логика предпрослушивания по клику
+          chip.addEventListener('click', async () => {
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+            const soundData = JSON.parse(chip.dataset.sound);
+            
+            // Загружаем звук, если его еще нет в памяти, и играем
+            await preloadAudioFile(soundData.file);
+            playNoteRealtime(soundData);
+            
+            // Временный статус
+            els.status.textContent = `🔊 Прослушивание: ${soundData.name}`;
+            setTimeout(() => {
+                if(els.status.textContent.startsWith('🔊')) els.status.textContent = 'Статус: готово к созданию музыки';
+            }, 1000);
+          });
+        });
       }
 
       function bindDropTargets() {
@@ -238,7 +260,6 @@
             const sound = JSON.parse(raw);
             const trackId = cell.dataset.track;
             
-            // ПРОВЕРКА СООТВЕТСТВИЯ КАТЕГОРИИ И ДОРОЖКИ
             if (sound.category !== trackId) {
                 const trackName = tracks.find(t => t.id === sound.category).name;
                 els.status.textContent = `❌ Ошибка: "${sound.name}" можно ставить только на дорожку "${trackName}"!`;
@@ -324,7 +345,6 @@
         els.playBtn.dataset.state = ''; renderGrid(); els.status.textContent = 'Остановлено';
       }
 
-      // Функция преобразования в WAV файл
       function audioBufferToWavBlob(audioBuffer) {
         const numChannels = audioBuffer.numberOfChannels;
         const sampleRate = audioBuffer.sampleRate;
@@ -349,11 +369,10 @@
         return new Blob([buffer], { type: 'audio/wav' });
       }
 
-      // Экспорт аудио
       async function exportWav() {
         els.status.textContent = '⏳ Рендеринг WAV файла (30 сек), подождите...';
         const stepDur = stepDurationMs() / 1000;
-        const totalDuration = 30; // 30 секунд
+        const totalDuration = 30;
         const offlineCtx = new OfflineAudioContext(2, 44100 * totalDuration, 44100);
         
         let mainGain = offlineCtx.createGain();
