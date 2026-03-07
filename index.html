@@ -17,21 +17,20 @@
       }
       * { box-sizing: border-box; }
       
+      /* Убрали z-index у body, чтобы слои работали правильно */
       body { margin: 0; background-color: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; }
       
-      /* --- ФОНОВЫЙ СЛОЙ (ВОЛНА) --- */
+      /* --- ФОНОВЫЙ СЛОЙ --- */
       .app-background {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('bg.png'); /* ВАША НОВАЯ КАРТИНКА bg.jpg */
+        background-image: url('./img/bg.png'); /* ПУТЬ К ВАШЕМУ ФАЙЛУ В ПАПКЕ img */
         background-size: cover; 
         background-position: center;
         background-repeat: no-repeat;
-        /* Волшебный фильтр: делает белый цвет на вашей картинке невидимым */
-        mix-blend-mode: multiply; 
-        opacity: 0.8; /* Делаем волну яркой и сочной */
-        z-index: -10; 
-        pointer-events: none; 
+        opacity: 0.35; /* Видимость картинки 35% */
+        z-index: 0; /* Кладем слой НАД фоном страницы, но ПОД интерфейсом */
+        pointer-events: none; /* Чтобы не перекрывала клики по кнопкам */
       }
       /* ----------------------- */
 
@@ -108,7 +107,7 @@
           <div class="toolbar-group">
             <span style="font-size: 12px; font-weight: bold; color: var(--muted);">Шаблоны:</span>
             <button class="preset-btn" onclick="loadPreset('beat')">Прямой бит</button>
-            <button class="preset-btn" onclick="loadPreset('synth')">Синт-вейв</button>
+            <button class="preset-btn" onclick="loadPreset('dance')">Танцевальный</button>
             <button class="preset-btn" onclick="loadPreset('funk')">Фанк</button>
             <button class="preset-btn danger" onclick="clearGrid()">🗑️ Очистить</button>
           </div>
@@ -211,7 +210,7 @@
         { id: 'bass', name: 'Басс', color: '#ef4444' },
       ];
 
-      // --- ГОТОВЫЕ ШАБЛОНЫ МЕЛОДИЙ ---
+      // --- ОБНОВЛЕННЫЕ ГОТОВЫЕ ШАБЛОНЫ МЕЛОДИЙ ---
       const appPresets = {
         beat: {
           name: "Прямой бит", tempo: 115, steps: 16,
@@ -222,13 +221,22 @@
             {t: 'bass', s: 0, i: 0}, {t: 'bass', s: 8, i: 0}
           ]
         },
-        synth: {
-          name: "Синт-вейв", tempo: 100, steps: 32,
+        dance: { // НОВЫЙ ТАНЦЕВАЛЬНЫЙ ШАБЛОН ВМЕСТО СИНТ-ВЕЙВА
+          name: "Танцевальный", tempo: 122, steps: 32,
           data: [
-            {t: 'drums', s: 0, i: 0}, {t: 'drums', s: 8, i: 0}, {t: 'drums', s: 16, i: 0}, {t: 'drums', s: 24, i: 0},
-            {t: 'cymbals', s: 8, i: 1}, {t: 'cymbals', s: 24, i: 1},
-            {t: 'synth', s: 0, i: 1}, {t: 'synth', s: 6, i: 1}, {t: 'synth', s: 16, i: 1}, {t: 'synth', s: 22, i: 1},
-            {t: 'bass', s: 0, i: 2}, {t: 'bass', s: 4, i: 2}, {t: 'bass', s: 8, i: 2}, {t: 'bass', s: 12, i: 2}, {t: 'bass', s: 16, i: 2}, {t: 'bass', s: 20, i: 2}, {t: 'bass', s: 24, i: 2}, {t: 'bass', s: 28, i: 2}
+            // Прямая ритмичная бочка (каждый удар)
+            {t: 'drums', s: 0, i: 0}, {t: 'drums', s: 4, i: 0}, {t: 'drums', s: 8, i: 0}, {t: 'drums', s: 12, i: 0},
+            {t: 'drums', s: 16, i: 0}, {t: 'drums', s: 20, i: 0}, {t: 'drums', s: 24, i: 0}, {t: 'drums', s: 28, i: 0},
+            // Хлопки на 2 и 4 долю
+            {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
+            // Открытый хэт между ударами бочки
+            {t: 'cymbals', s: 2, i: 0}, {t: 'cymbals', s: 6, i: 0}, {t: 'cymbals', s: 10, i: 0}, {t: 'cymbals', s: 14, i: 0},
+            {t: 'cymbals', s: 18, i: 0}, {t: 'cymbals', s: 22, i: 0}, {t: 'cymbals', s: 26, i: 0}, {t: 'cymbals', s: 30, i: 0},
+            // Динамичный синтезаторный бас (играет в слабую долю)
+            {t: 'bass', s: 2, i: 2}, {t: 'bass', s: 6, i: 2}, {t: 'bass', s: 10, i: 2}, {t: 'bass', s: 14, i: 2},
+            {t: 'bass', s: 18, i: 2}, {t: 'bass', s: 22, i: 2}, {t: 'bass', s: 26, i: 2}, {t: 'bass', s: 30, i: 2},
+            // Аккорды пэда на начало каждого такта
+            {t: 'synth', s: 0, i: 1}, {t: 'synth', s: 16, i: 1}
           ]
         },
         funk: {
@@ -238,7 +246,7 @@
             {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
             {t: 'cymbals', s: 0, i: 2}, {t: 'cymbals', s: 8, i: 2}, {t: 'cymbals', s: 16, i: 2}, {t: 'cymbals', s: 24, i: 2}, 
             {t: 'guitar', s: 4, i: 2}, {t: 'guitar', s: 12, i: 2}, {t: 'guitar', s: 20, i: 2}, {t: 'guitar', s: 28, i: 2},
-            // Двойные трубы, как просили!
+            // Двойные трубы, как просили
             {t: 'brass', s: 14, i: 1}, {t: 'brass', s: 15, i: 1}, {t: 'brass', s: 30, i: 1}, {t: 'brass', s: 31, i: 1},
             {t: 'bass', s: 0, i: 1}, {t: 'bass', s: 3, i: 1}, {t: 'bass', s: 8, i: 1}, {t: 'bass', s: 16, i: 1}, {t: 'bass', s: 19, i: 1}, {t: 'bass', s: 24, i: 1}
           ]
