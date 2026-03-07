@@ -23,12 +23,16 @@
       .app-background {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('./IMG/bg.png'); /* ПАПКА БОЛЬШИМИ, ФАЙЛ МАЛЕНЬКИМИ! */
+        background-image: url('./IMG/bg.png'); /* Путь верный! */
         background-size: cover; 
         background-position: center;
         background-repeat: no-repeat;
-        opacity: 0.4; /* Видимость 40% */
-        z-index: 0; /* Находится под панелями игры */
+        
+        /* МАГИЯ ЗДЕСЬ: */
+        mix-blend-mode: multiply; /* Убирает белый фон картинки */
+        opacity: 0.9; /* 90% яркости, чтобы линии было чётко видно */
+        
+        z-index: 0; 
         pointer-events: none; 
       }
       /* ----------------------- */
@@ -170,7 +174,6 @@
           { name: 'Ломаный', type: 'triangle', freq: 100, file: 'kick_2', color: '#ea580c' },
           { name: 'Глухой', type: 'square', freq: 80, file: 'kick_3', color: '#c2410c' },
         ],
-        // --- ОБНОВЛЕННЫЕ ТАРЕЛКИ (С КРЭШЕМ) ---
         cymbals: [
           { name: 'Хэт', type: 'square', freq: 2000, file: 'hat_closed_1', color: '#facc15' },
           { name: 'Клэп', type: 'triangle', freq: 900, file: 'clap_1', color: '#eab308' },
@@ -207,7 +210,6 @@
         { id: 'bass', name: 'Басс', color: '#ef4444' },
       ];
 
-      // --- ГОТОВЫЕ ШАБЛОНЫ (ОБНОВЛЕНЫ ПОД КРЭШ) ---
       const appPresets = {
         beat: {
           name: "Прямой бит", tempo: 115, steps: 16,
@@ -226,7 +228,7 @@
             {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
             {t: 'cymbals', s: 2, i: 0}, {t: 'cymbals', s: 6, i: 0}, {t: 'cymbals', s: 10, i: 0}, {t: 'cymbals', s: 14, i: 0},
             {t: 'cymbals', s: 18, i: 0}, {t: 'cymbals', s: 22, i: 0}, {t: 'cymbals', s: 26, i: 0}, {t: 'cymbals', s: 30, i: 0},
-            {t: 'cymbals', s: 0, i: 2}, /* Мощный Крэш на старте! */
+            {t: 'cymbals', s: 0, i: 2}, 
             {t: 'bass', s: 2, i: 2}, {t: 'bass', s: 6, i: 2}, {t: 'bass', s: 10, i: 2}, {t: 'bass', s: 14, i: 2},
             {t: 'bass', s: 18, i: 2}, {t: 'bass', s: 22, i: 2}, {t: 'bass', s: 26, i: 2}, {t: 'bass', s: 30, i: 2},
             {t: 'synth', s: 0, i: 1}, {t: 'synth', s: 16, i: 1}
@@ -237,10 +239,10 @@
           data: [
             {t: 'drums', s: 0, i: 1}, {t: 'drums', s: 10, i: 1}, {t: 'drums', s: 16, i: 1}, {t: 'drums', s: 26, i: 1},
             {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
-            {t: 'cymbals', s: 0, i: 2}, /* Мощный Крэш на старте! */
+            {t: 'cymbals', s: 0, i: 2}, 
             {t: 'cymbals', s: 8, i: 0}, {t: 'cymbals', s: 16, i: 0}, {t: 'cymbals', s: 24, i: 0}, 
             {t: 'guitar', s: 4, i: 2}, {t: 'guitar', s: 12, i: 2}, {t: 'guitar', s: 20, i: 2}, {t: 'guitar', s: 28, i: 2},
-            {t: 'brass', s: 14, i: 1}, {t: 'brass', s: 15, i: 1}, {t: 'brass', s: 30, i: 1}, {t: 'brass', s: 31, i: 1}, /* Трубы двойные */
+            {t: 'brass', s: 14, i: 1}, {t: 'brass', s: 15, i: 1}, {t: 'brass', s: 30, i: 1}, {t: 'brass', s: 31, i: 1}, 
             {t: 'bass', s: 0, i: 1}, {t: 'bass', s: 3, i: 1}, {t: 'bass', s: 8, i: 1}, {t: 'bass', s: 16, i: 1}, {t: 'bass', s: 19, i: 1}, {t: 'bass', s: 24, i: 1}
           ]
         }
@@ -537,6 +539,16 @@
 
       resetSequence(32); els.tempoValue.value = state.tempo; els.reverbValue.value = state.fx.reverb; els.echoValue.value = state.fx.echo;
       buildGrid(); buildPalette(); renderGrid();
+
+      // --- ПРОВЕРКА НА ОШИБКУ ---
+      window.onload = () => {
+        const bgChecker = new Image();
+        bgChecker.onerror = function() {
+          alert("❌ ОШИБКА!\nСервер на GitHub всё ещё НЕ ВИДИТ картинку ./IMG/bg.png.\nТочно ли вы загрузили этот файл в репозиторий на GitHub?");
+        };
+        bgChecker.src = './IMG/bg.png';
+      };
+      // -------------------------------------
     </script>
   </body>
 </html>
