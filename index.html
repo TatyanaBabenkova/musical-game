@@ -7,18 +7,33 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f0f4f8; --panel: #ffffff; --panel-soft: #f8fafc;
+        --bg: #f0f4f8; --panel: rgba(255, 255, 255, 0.95); --panel-soft: rgba(248, 250, 252, 0.9);
         --line: #cbd5e1; --accent: #3b82f6; --accent-2: #10b981;
         --danger: #ef4444; --text: #1e293b; --muted: #64748b;
       }
       * { box-sizing: border-box; }
-      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; }
+      
+      /* --- НАСТРОЙКА ФОНА --- */
+      body { margin: 0; background-color: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; position: relative; z-index: 0; }
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: url('./img/bg.jpg'); /* Путь к вашей картинке */
+        background-size: cover; /* Растянуть на весь экран (если это паттерн, поменяйте на 'repeat') */
+        background-position: center;
+        opacity: 0.06; /* Прозрачность 6% - идеальный водяной знак */
+        z-index: -1; /* Прячем картинку на самый задний план */
+        pointer-events: none;
+      }
+      /* ----------------------- */
+
       .app { max-width: 1540px; margin: 20px auto; padding: 14px; }
-      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); backdrop-filter: blur(8px); }
       .toolbar, .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
       .toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
       
-      button, input, select { border: 1px solid var(--line); background: var(--panel-soft); color: var(--text); border-radius: 10px; padding: 8px 14px; font: inherit; transition: all 0.2s; }
+      button, input, select { border: 1px solid var(--line); background: #ffffff; color: var(--text); border-radius: 10px; padding: 8px 14px; font: inherit; transition: all 0.2s; }
       button { cursor: pointer; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
       button:hover { border-color: var(--accent); background: #f1f5f9; }
       button[data-state='active'] { border-color: var(--accent-2); background: #ecfdf5; color: #065f46; box-shadow: 0 0 0 1px var(--accent-2) inset; }
@@ -51,7 +66,7 @@
       .meta { margin-top: 15px; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; font-weight: 500; }
       #status { transition: color 0.3s; }
       #status.error { color: var(--danger); font-weight: bold; }
-      .hint { margin-top: 5px; font-size: 13px; color: #3b82f6; background: #eff6ff; padding: 10px; border-radius: 8px;}
+      .hint { margin-top: 5px; font-size: 13px; color: #3b82f6; background: rgba(239, 246, 255, 0.9); padding: 10px; border-radius: 8px;}
       
       .palette { margin-top: 20px; border-top: 2px dashed var(--line); padding-top: 15px; }
       .palette h3 { margin: 0 0 12px; font-size: 16px; color: var(--text); }
@@ -61,7 +76,6 @@
       
       .sound-chip { border: none; border-radius: 6px; padding: 8px 6px; margin-bottom: 8px; font-size: 12px; cursor: grab; color: white; font-weight: 600; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: transform 0.1s; text-shadow: 0 1px 1px rgba(0,0,0,0.3); }
       .sound-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-      /* Эффект нажатия (тап/клик) */
       .sound-chip:active { transform: scale(0.95); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
     </style>
   </head>
@@ -226,25 +240,15 @@
           return `<div class="palette-col"><strong>${catNames[cat]}</strong>${chips}</div>`;
         }).join('');
         
-        // Добавляем предпрослушивание и drag-and-drop
         els.palette.querySelectorAll('.sound-chip').forEach(chip => {
-          // Логика перетаскивания
           chip.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', chip.dataset.sound));
-          
-          // Логика предпрослушивания по клику
           chip.addEventListener('click', async () => {
             if (audioCtx.state === 'suspended') await audioCtx.resume();
             const soundData = JSON.parse(chip.dataset.sound);
-            
-            // Загружаем звук, если его еще нет в памяти, и играем
             await preloadAudioFile(soundData.file);
             playNoteRealtime(soundData);
-            
-            // Временный статус
             els.status.textContent = `🔊 Прослушивание: ${soundData.name}`;
-            setTimeout(() => {
-                if(els.status.textContent.startsWith('🔊')) els.status.textContent = 'Статус: готово к созданию музыки';
-            }, 1000);
+            setTimeout(() => { if(els.status.textContent.startsWith('🔊')) els.status.textContent = 'Статус: готово к созданию музыки'; }, 1000);
           });
         });
       }
