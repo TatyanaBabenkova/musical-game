@@ -7,63 +7,74 @@
     <style>
       :root {
         color-scheme: light;
-        --bg-color: #f0f4f8; 
-        --panel: rgba(255, 255, 255, 0.6); 
-        --panel-soft: rgba(255, 255, 255, 0.4);
-        --line: rgba(203, 213, 225, 0.8); 
+        --panel: rgba(255, 255, 255, 0.7); 
+        --panel-soft: rgba(255, 255, 255, 0.5);
+        --line: rgba(148, 163, 184, 0.4); 
         --accent: #3b82f6; --accent-2: #10b981;
         --danger: #ef4444; --text: #1e293b; --muted: #475569;
       }
       * { box-sizing: border-box; }
       
-      /* --- ЖЕЛЕЗОБЕТОННЫЙ ФОН --- */
-      html { background-color: var(--bg-color); } /* Базовый цвет в самом низу */
+      /* Чуть затемнили фон, чтобы белые панели и волны контрастировали */
       body { 
         margin: 0; 
+        background-color: #e2e8f0; 
         color: var(--text); 
-        font-family: Inter, Segoe UI, sans-serif;
-        background-image: url('./IMG/bg.png'); /* ПУТЬ СТРОГО ИЗ ВАШЕГО СООБЩЕНИЯ */
-        background-size: cover;
+        font-family: Inter, Segoe UI, sans-serif; 
+      }
+      
+      /* --- ИДЕАЛЬНЫЙ ФОНОВЫЙ СЛОЙ --- */
+      .app-background {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: url('./IMG/bg.png'); /* Файл найден, путь верный! */
+        background-size: cover; 
         background-position: center;
-        background-attachment: fixed;
+        background-repeat: no-repeat;
+        
+        /* МАГИЯ ЗДЕСЬ: убирает белый фон у вашей картинки */
+        mix-blend-mode: multiply; 
+        opacity: 1; /* 100% яркости для бледных волн */
+        
+        z-index: 0; 
+        pointer-events: none; 
       }
       /* ----------------------- */
 
-      .app { max-width: 1500px; margin: 10px auto; padding: 10px; }
+      /* Слой с игрой лежит ВЫШЕ картинки (z-index: 10) */
+      .app { max-width: 1500px; margin: 10px auto; padding: 10px; position: relative; z-index: 10;}
       
       .panel { background: var(--panel); border: 1px solid rgba(255,255,255,0.8); border-radius: 16px; padding: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
       
       .toolbar, .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
       .toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
       
-      button, input, select { border: 1px solid rgba(255,255,255,0.8); background: rgba(255,255,255,0.8); color: var(--text); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; transition: all 0.2s; backdrop-filter: blur(5px);}
+      button, input, select { border: 1px solid rgba(255,255,255,0.8); background: rgba(255,255,255,0.9); color: var(--text); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; transition: all 0.2s;}
       button { cursor: pointer; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-      button:hover { border-color: var(--accent); background: rgba(255,255,255,1); transform: translateY(-1px);}
+      button:hover { border-color: var(--accent); background: #ffffff; transform: translateY(-1px);}
       button[data-state='active'] { border-color: var(--accent-2); background: rgba(236, 253, 245, 0.9); color: #065f46; box-shadow: 0 0 0 1px var(--accent-2) inset; }
       
       .primary { background: var(--accent); color: white; border: 0; }
       .primary:hover { background: #2563eb; color: white; }
       .danger { border-color: var(--danger); color: #b91c1c; }
-      .preset-btn { background: rgba(248, 250, 252, 0.8); color: #334155; }
+      .preset-btn { background: rgba(248, 250, 252, 0.9); color: #334155; }
       
       .tempo, .fx-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;}
       .tempo output, .fx-item output { min-width: 25px; color: var(--accent); font-weight: bold;}
       
-      /* --- ГОРИЗОНТАЛЬНАЯ ПРОКРУТКА ДЛЯ ТЕЛЕФОНОВ --- */
+      /* --- ГОРИЗОНТАЛЬНАЯ ПРОКРУТКА СЕТКИ --- */
       .grid-wrap { 
-        border: 1px solid rgba(255,255,255,0.6); 
+        border: 1px solid rgba(255,255,255,0.8); 
         border-radius: 12px; 
-        overflow-x: auto; /* СКРОЛЛ ПО ГОРИЗОНТАЛИ */
+        overflow-x: auto; 
         overflow-y: hidden;
         background: var(--panel-soft); 
         box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
         padding-bottom: 5px;
       }
-      /* Делаем сетку через Flexbox для идеального скролла */
       .grid-header, .grid-row { display: flex; min-width: max-content; border-bottom: 1px solid var(--line); }
-      .grid-header { position: sticky; top: 0; z-index: 20; background: rgba(226, 232, 240, 0.8); backdrop-filter: blur(8px); border-bottom: 2px solid var(--line);}
+      .grid-header { position: sticky; top: 0; z-index: 20; background: rgba(226, 232, 240, 0.85); backdrop-filter: blur(8px); border-bottom: 2px solid var(--line);}
       
-      /* Прилипающая панель с названиями инструментов */
       .track-label { 
         position: sticky; 
         left: 0; 
@@ -83,14 +94,14 @@
       }
       .grid-header .track-label { background: rgba(226, 232, 240, 0.95); z-index: 40; height: 35px; justify-content: center;}
       
-      /* Фиксированный размер клеточек, чтобы в них было легко попасть пальцем */
+      /* Фиксированный размер клеточек для мобильных */
       .step, .cell { width: 40px; height: 40px; flex-shrink: 0; border-right: 1px solid var(--line); }
       .step { display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); font-weight: bold; height: 35px;}
       
       .instrument-dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.3);}
       
       .cell { background: rgba(255, 255, 255, 0.4); cursor: pointer; position: relative; transition: background 0.1s;}
-      .cell:nth-child(4n + 2) { border-left: 2px solid rgba(148, 163, 184, 0.4); } /* Выделение тактов */
+      .cell:nth-child(4n + 2) { border-left: 2px solid rgba(148, 163, 184, 0.5); }
       .cell:hover { background: rgba(255, 255, 255, 0.9); }
       .cell.active { background: rgba(224, 242, 254, 0.9); }
       .cell.playhead::after { content: ''; position: absolute; inset: 0; border: 2px solid rgba(59, 130, 246, 0.9); background: rgba(59, 130, 246, 0.2); pointer-events: none; }
@@ -102,39 +113,33 @@
       #status { transition: color 0.3s; }
       #status.error { color: var(--danger); font-weight: bold; }
       
-      /* Обновленная инструкция для режима кисти */
-      .hint { margin-top: 5px; font-size: 13px; color: #1d4ed8; background: rgba(219, 234, 254, 0.8); padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(191, 219, 254, 0.8);}
+      .hint { margin-top: 5px; font-size: 13px; color: #1d4ed8; background: rgba(219, 234, 254, 0.85); padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(191, 219, 254, 0.8);}
       
       /* --- АДАПТИВНЫЙ ИНВЕНТАРЬ --- */
       .palette { margin-top: 10px; border-top: 2px dashed var(--line); padding-top: 15px; }
       .palette h3 { margin: 0 0 10px; font-size: 15px; color: var(--text); }
-      /* Категории перестраиваются в столбики на телефонах */
       .palette-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-      .palette-col { border: 1px solid rgba(255,255,255,0.6); border-radius: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); box-shadow: inset 0 2px 10px rgba(255,255,255,0.5);}
+      .palette-col { border: 1px solid rgba(255,255,255,0.8); border-radius: 10px; padding: 10px; background: rgba(255, 255, 255, 0.6); box-shadow: inset 0 2px 10px rgba(255,255,255,0.5);}
       .palette-col strong { display: block; margin-bottom: 8px; font-size: 11px; color: var(--text); text-align: center; text-transform: uppercase; letter-spacing: 0.5px;}
       
       .sound-chip { width: 100%; border: none; border-radius: 6px; padding: 8px 4px; margin-bottom: 8px; font-size: 12px; cursor: pointer; color: white; font-weight: bold; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: all 0.2s; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
       .sound-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
       
-      /* ВЫДЕЛЕНИЕ АКТИВНОЙ КИСТИ */
+      /* КИСТЬ ВЫДЕЛЕНА */
       .sound-chip.selected { 
         transform: scale(1.05); 
         box-shadow: 0 0 0 3px var(--text), 0 6px 12px rgba(0,0,0,0.3); 
         position: relative;
         z-index: 5;
       }
-      .sound-chip.selected::before {
-        content: '🖌️';
-        position: absolute;
-        left: -8px;
-        top: -8px;
-        font-size: 16px;
-      }
+      .sound-chip.selected::before { content: '🖌️'; position: absolute; left: -8px; top: -8px; font-size: 16px; }
     </style>
   </head>
   <body>
 
     <main class="app">
+      <div class="app-background"></div>
+
       <section class="panel">
         <div class="toolbar">
           <div class="toolbar-group">
@@ -185,7 +190,7 @@
           <input id="trackName" type="text" placeholder="Название трека" value="Мой Хит" style="width: 150px;"/>
         </div>
 
-        <p class="hint">💡 <b>Новое управление:</b> 1. Кликните на инструмент внизу, чтобы «взять» его (появится кисточка 🖌️). <br>2. Кликайте по пустым клеточкам на сетке, чтобы расставить звук. Клик по готовому звуку удалит его.</p>
+        <p class="hint">💡 <b>Новое управление (как на ПК, так и на телефоне):</b> <br>1. Кликните на инструмент внизу, чтобы «взять» его (появится кисточка 🖌️). <br>2. Кликайте по пустым клеточкам на сетке, чтобы расставить звук. Клик по готовому звуку удалит его.</p>
 
         <div class="grid-wrap">
           <div class="grid-header" id="gridHeader"></div>
@@ -290,7 +295,7 @@
       const state = { 
         steps: 32, tempo: 110, currentStep: 0, isPlaying: false, timerId: null, loopEnabled: true, fx: { reverb: 10, echo: 0 }, 
         sequence: {}, soundMap: {},
-        activeBrush: null // НОВОЕ СВОЙСТВО: Какая кисть сейчас выбрана
+        activeBrush: null 
       };
 
       const els = {
@@ -344,21 +349,16 @@
           return `<div class="palette-col"><strong>${catNames[cat]}</strong>${chips}</div>`;
         }).join('');
         
-        // ЛОГИКА ВЫБОРА КИСТИ (Вместо перетаскивания)
         els.palette.querySelectorAll('.sound-chip').forEach(chip => {
           chip.addEventListener('click', async () => {
             if (audioCtx.state === 'suspended') await audioCtx.resume();
             
-            // Снимаем выделение со всех
             document.querySelectorAll('.sound-chip').forEach(c => c.classList.remove('selected'));
-            
-            // Выделяем нажатую
             chip.classList.add('selected');
             
             const soundData = JSON.parse(chip.dataset.sound);
-            state.activeBrush = soundData; // Запомнили кисть
+            state.activeBrush = soundData;
             
-            // Проигрываем звук для превью
             await preloadAudioFile(soundData.file);
             playNoteRealtime(soundData);
             
@@ -368,7 +368,6 @@
         });
       }
 
-      // --- НОВАЯ ЛОГИКА РИСОВАНИЯ (КЛИК ПО СЕТКЕ) ---
       els.gridBody.addEventListener('click', (e) => {
         const cell = e.target.closest('.cell'); 
         if (!cell) return;
@@ -376,7 +375,6 @@
         const trackId = cell.dataset.track; 
         const step = Number(cell.dataset.step);
 
-        // 1. Если звук уже стоит - удаляем его (работает как ластик)
         if (state.sequence[trackId][step]) { 
             state.sequence[trackId][step] = false; 
             state.soundMap[trackId][step] = null; 
@@ -384,7 +382,6 @@
             return; 
         }
 
-        // 2. Если клетка пустая, проверяем, выбрана ли кисть
         if (!state.activeBrush) {
             els.status.textContent = `⚠️ Сначала выберите инструмент в меню внизу!`;
             els.status.classList.add('error');
@@ -392,7 +389,6 @@
             return;
         }
 
-        // 3. Защита от дурака: проверяем ту ли дорожку кликнули
         if (state.activeBrush.category !== trackId) {
             const trackName = tracks.find(t => t.id === state.activeBrush.category).name;
             els.status.textContent = `❌ Ошибка: "${state.activeBrush.name}" ставится только на дорожку "${trackName}"!`;
@@ -402,7 +398,6 @@
             return;
         }
 
-        // 4. Если всё правильно - ставим звук!
         state.sequence[trackId][step] = true;
         state.soundMap[trackId][step] = state.activeBrush;
         preloadAudioFile(state.activeBrush.file);
@@ -493,7 +488,6 @@
         tracks.forEach(t => { if (state.sequence[t.id][state.currentStep]) playNoteRealtime(state.soundMap[t.id][state.currentStep]); });
         renderGrid();
         
-        // Автоскролл сетки во время игры
         const activeCell = document.querySelector(`.cell.playhead`);
         if (activeCell) {
             const wrap = els.gridBody.closest('.grid-wrap');
