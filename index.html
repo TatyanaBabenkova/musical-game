@@ -7,93 +7,132 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f4f7f6; 
-        /* Полупрозрачные панели для эффекта стекла */
-        --panel: rgba(255, 255, 255, 0.45); 
-        --panel-soft: rgba(255, 255, 255, 0.35);
-        --line: rgba(203, 213, 225, 0.6); 
+        --bg-color: #f0f4f8; 
+        --panel: rgba(255, 255, 255, 0.6); 
+        --panel-soft: rgba(255, 255, 255, 0.4);
+        --line: rgba(203, 213, 225, 0.8); 
         --accent: #3b82f6; --accent-2: #10b981;
         --danger: #ef4444; --text: #1e293b; --muted: #475569;
       }
       * { box-sizing: border-box; }
       
-      body { margin: 0; background-color: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; }
-      
-      /* --- ФОНОВЫЙ СЛОЙ --- */
-      .app-background {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('./IMG/bg.png'); /* Путь верный! */
-        background-size: cover; 
+      /* --- ЖЕЛЕЗОБЕТОННЫЙ ФОН --- */
+      html { background-color: var(--bg-color); } /* Базовый цвет в самом низу */
+      body { 
+        margin: 0; 
+        color: var(--text); 
+        font-family: Inter, Segoe UI, sans-serif;
+        background-image: url('./IMG/bg.png'); /* ПУТЬ СТРОГО ИЗ ВАШЕГО СООБЩЕНИЯ */
+        background-size: cover;
         background-position: center;
-        background-repeat: no-repeat;
-        
-        /* МАГИЯ ЗДЕСЬ: */
-        mix-blend-mode: multiply; /* Убирает белый фон картинки */
-        opacity: 0.9; /* 90% яркости, чтобы линии было чётко видно */
-        
-        z-index: 0; 
-        pointer-events: none; 
+        background-attachment: fixed;
       }
       /* ----------------------- */
 
-      .app { max-width: 1500px; margin: 10px auto; padding: 10px; position: relative; z-index: 1;}
+      .app { max-width: 1500px; margin: 10px auto; padding: 10px; }
       
-      .panel { background: var(--panel); border: 1px solid rgba(255,255,255,0.8); border-radius: 16px; padding: 12px 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+      .panel { background: var(--panel); border: 1px solid rgba(255,255,255,0.8); border-radius: 16px; padding: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
       
-      .toolbar, .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-      .toolbar-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+      .toolbar, .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+      .toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
       
-      button, input, select { border: 1px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.7); color: var(--text); border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 13px; transition: all 0.2s; backdrop-filter: blur(5px);}
-      button { cursor: pointer; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-      button:hover { border-color: var(--accent); background: rgba(255,255,255,1); }
-      button[data-state='active'] { border-color: var(--accent-2); background: rgba(236, 253, 245, 0.8); color: #065f46; box-shadow: 0 0 0 1px var(--accent-2) inset; }
+      button, input, select { border: 1px solid rgba(255,255,255,0.8); background: rgba(255,255,255,0.8); color: var(--text); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; transition: all 0.2s; backdrop-filter: blur(5px);}
+      button { cursor: pointer; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+      button:hover { border-color: var(--accent); background: rgba(255,255,255,1); transform: translateY(-1px);}
+      button[data-state='active'] { border-color: var(--accent-2); background: rgba(236, 253, 245, 0.9); color: #065f46; box-shadow: 0 0 0 1px var(--accent-2) inset; }
       
-      .primary { background: #3b82f6; color: white; border: 0; }
+      .primary { background: var(--accent); color: white; border: 0; }
       .primary:hover { background: #2563eb; color: white; }
-      .danger { border-color: #ef4444; color: #b91c1c; }
-      .preset-btn { background: rgba(248, 250, 252, 0.7); border-color: #94a3b8; color: #334155; font-weight: 600;}
-      .preset-btn:hover { background: rgba(226, 232, 240, 0.9); }
+      .danger { border-color: var(--danger); color: #b91c1c; }
+      .preset-btn { background: rgba(248, 250, 252, 0.8); color: #334155; }
       
       .tempo, .fx-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;}
       .tempo output, .fx-item output { min-width: 25px; color: var(--accent); font-weight: bold;}
       
-      .grid-wrap { border: 1px solid rgba(255,255,255,0.5); border-radius: 10px; overflow: auto; max-height: 45vh; background: var(--panel-soft); backdrop-filter: blur(8px); box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);}
-      .grid-header, .grid-row { display: grid; grid-template-columns: 160px repeat(var(--steps), minmax(24px, 1fr)); min-width: max-content; }
-      .grid-header { position: sticky; top: 0; z-index: 2; background: rgba(226, 232, 240, 0.6); backdrop-filter: blur(10px); }
-      .grid-header div, .grid-row > div { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 32px; }
-      .grid-header .step { display: grid; place-items: center; font-size: 11px; color: var(--muted); font-weight: bold;}
+      /* --- ГОРИЗОНТАЛЬНАЯ ПРОКРУТКА ДЛЯ ТЕЛЕФОНОВ --- */
+      .grid-wrap { 
+        border: 1px solid rgba(255,255,255,0.6); 
+        border-radius: 12px; 
+        overflow-x: auto; /* СКРОЛЛ ПО ГОРИЗОНТАЛИ */
+        overflow-y: hidden;
+        background: var(--panel-soft); 
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+        padding-bottom: 5px;
+      }
+      /* Делаем сетку через Flexbox для идеального скролла */
+      .grid-header, .grid-row { display: flex; min-width: max-content; border-bottom: 1px solid var(--line); }
+      .grid-header { position: sticky; top: 0; z-index: 20; background: rgba(226, 232, 240, 0.8); backdrop-filter: blur(8px); border-bottom: 2px solid var(--line);}
       
-      .track-label { padding: 4px 8px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; background: rgba(248, 250, 252, 0.5); }
-      .instrument-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.2);}
+      /* Прилипающая панель с названиями инструментов */
+      .track-label { 
+        position: sticky; 
+        left: 0; 
+        z-index: 30; 
+        width: 140px; 
+        flex-shrink: 0; 
+        padding: 0 10px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        font-size: 13px; 
+        font-weight: 600; 
+        background: rgba(241, 245, 249, 0.95); 
+        backdrop-filter: blur(5px);
+        border-right: 2px solid var(--line);
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+      }
+      .grid-header .track-label { background: rgba(226, 232, 240, 0.95); z-index: 40; height: 35px; justify-content: center;}
       
-      .cell { background: rgba(255, 255, 255, 0.3); cursor: pointer; position: relative; transition: background 0.1s;}
-      .cell.bar-start { box-shadow: -2px 0 0 0 rgba(203, 213, 225, 0.5) inset; }
-      .cell:hover { background: rgba(255, 255, 255, 0.8); }
-      .cell.active { background: rgba(224, 242, 254, 0.8); }
-      .cell.playhead::after { content: ''; position: absolute; inset: 0; border: 2px solid rgba(59, 130, 246, 0.8); background: rgba(59, 130, 246, 0.15); pointer-events: none; }
-      .cell.error-shake { background: rgba(254, 226, 226, 0.8); }
+      /* Фиксированный размер клеточек, чтобы в них было легко попасть пальцем */
+      .step, .cell { width: 40px; height: 40px; flex-shrink: 0; border-right: 1px solid var(--line); }
+      .step { display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); font-weight: bold; height: 35px;}
       
-      .cell-content { position: absolute; inset: 1px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; font-weight: bold; overflow: hidden; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+      .instrument-dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.3);}
       
-      .meta { margin-top: 8px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; font-weight: 500; }
+      .cell { background: rgba(255, 255, 255, 0.4); cursor: pointer; position: relative; transition: background 0.1s;}
+      .cell:nth-child(4n + 2) { border-left: 2px solid rgba(148, 163, 184, 0.4); } /* Выделение тактов */
+      .cell:hover { background: rgba(255, 255, 255, 0.9); }
+      .cell.active { background: rgba(224, 242, 254, 0.9); }
+      .cell.playhead::after { content: ''; position: absolute; inset: 0; border: 2px solid rgba(59, 130, 246, 0.9); background: rgba(59, 130, 246, 0.2); pointer-events: none; }
+      .cell.error-shake { background: rgba(254, 226, 226, 0.9); }
+      
+      .cell-content { position: absolute; inset: 2px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; font-weight: bold; overflow: hidden; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.5); box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+      
+      .meta { margin-top: 10px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; font-weight: 500; }
       #status { transition: color 0.3s; }
       #status.error { color: var(--danger); font-weight: bold; }
-      .hint { margin-top: 4px; font-size: 12px; color: #2563eb; background: rgba(239, 246, 255, 0.6); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px;}
       
-      .palette { margin-top: 10px; border-top: 2px dashed var(--line); padding-top: 10px; }
-      .palette h3 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
-      .palette-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
-      .palette-col { border: 1px solid rgba(255,255,255,0.5); border-radius: 8px; padding: 8px; background: rgba(255, 255, 255, 0.4); box-shadow: inset 0 2px 10px rgba(255,255,255,0.5);}
-      .palette-col strong { display: block; margin-bottom: 6px; font-size: 11px; color: var(--text); text-align: center; text-transform: uppercase; letter-spacing: 0.5px;}
+      /* Обновленная инструкция для режима кисти */
+      .hint { margin-top: 5px; font-size: 13px; color: #1d4ed8; background: rgba(219, 234, 254, 0.8); padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(191, 219, 254, 0.8);}
       
-      .sound-chip { border: none; border-radius: 4px; padding: 6px 4px; margin-bottom: 6px; font-size: 11px; cursor: grab; color: white; font-weight: 600; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: transform 0.1s; text-shadow: 0 1px 1px rgba(0,0,0,0.3); }
-      .sound-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-      .sound-chip:active { transform: scale(0.95); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+      /* --- АДАПТИВНЫЙ ИНВЕНТАРЬ --- */
+      .palette { margin-top: 10px; border-top: 2px dashed var(--line); padding-top: 15px; }
+      .palette h3 { margin: 0 0 10px; font-size: 15px; color: var(--text); }
+      /* Категории перестраиваются в столбики на телефонах */
+      .palette-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+      .palette-col { border: 1px solid rgba(255,255,255,0.6); border-radius: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); box-shadow: inset 0 2px 10px rgba(255,255,255,0.5);}
+      .palette-col strong { display: block; margin-bottom: 8px; font-size: 11px; color: var(--text); text-align: center; text-transform: uppercase; letter-spacing: 0.5px;}
+      
+      .sound-chip { width: 100%; border: none; border-radius: 6px; padding: 8px 4px; margin-bottom: 8px; font-size: 12px; cursor: pointer; color: white; font-weight: bold; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: all 0.2s; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+      .sound-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+      
+      /* ВЫДЕЛЕНИЕ АКТИВНОЙ КИСТИ */
+      .sound-chip.selected { 
+        transform: scale(1.05); 
+        box-shadow: 0 0 0 3px var(--text), 0 6px 12px rgba(0,0,0,0.3); 
+        position: relative;
+        z-index: 5;
+      }
+      .sound-chip.selected::before {
+        content: '🖌️';
+        position: absolute;
+        left: -8px;
+        top: -8px;
+        font-size: 16px;
+      }
     </style>
   </head>
   <body>
-    <div class="app-background"></div>
 
     <main class="app">
       <section class="panel">
@@ -146,7 +185,7 @@
           <input id="trackName" type="text" placeholder="Название трека" value="Мой Хит" style="width: 150px;"/>
         </div>
 
-        <p class="hint">💡 <b>Инструкция:</b> Выберите готовый шаблон или перетаскивайте кубики инструментов из инвентаря на сетку. Клик по ячейке удаляет звук.</p>
+        <p class="hint">💡 <b>Новое управление:</b> 1. Кликните на инструмент внизу, чтобы «взять» его (появится кисточка 🖌️). <br>2. Кликайте по пустым клеточкам на сетке, чтобы расставить звук. Клик по готовому звуку удалит его.</p>
 
         <div class="grid-wrap">
           <div class="grid-header" id="gridHeader"></div>
@@ -159,7 +198,7 @@
         </div>
 
         <div class="palette">
-          <h3>Инвентарь звуков</h3>
+          <h3>Инвентарь звуков (Нажмите для выбора)</h3>
           <div class="palette-grid" id="palette"></div>
         </div>
       </section>
@@ -170,14 +209,14 @@
 
       const soundLibrary = {
         drums: [
-          { name: 'Бочка', type: 'sine', freq: 60, file: 'kick_1', color: '#f97316' },
-          { name: 'Ломаный', type: 'triangle', freq: 100, file: 'kick_2', color: '#ea580c' },
-          { name: 'Глухой', type: 'square', freq: 80, file: 'kick_3', color: '#c2410c' },
+          { name: 'Бочка', type: 'sine', freq: 60, file: 'kick_1', color: '#ea580c' },
+          { name: 'Ломаный', type: 'triangle', freq: 100, file: 'kick_2', color: '#c2410c' },
+          { name: 'Глухой', type: 'square', freq: 80, file: 'kick_3', color: '#9a3412' },
         ],
         cymbals: [
-          { name: 'Хэт', type: 'square', freq: 2000, file: 'hat_closed_1', color: '#facc15' },
-          { name: 'Клэп', type: 'triangle', freq: 900, file: 'clap_1', color: '#eab308' },
-          { name: 'Крэш', type: 'sawtooth', freq: 3000, file: 'crash_1', color: '#ca8a04' },
+          { name: 'Хэт', type: 'square', freq: 2000, file: 'hat_closed_1', color: '#eab308' },
+          { name: 'Клэп', type: 'triangle', freq: 900, file: 'clap_1', color: '#ca8a04' },
+          { name: 'Крэш', type: 'sawtooth', freq: 3000, file: 'crash_1', color: '#a16207' },
         ],
         guitar: [
           { name: 'Классика', type: 'triangle', freq: 330, file: 'guitar_acoustic', color: '#22c55e' },
@@ -185,9 +224,9 @@
           { name: 'Аккорд', type: 'square', freq: 196, file: 'guitar_chord', color: '#15803d' },
         ],
         synth: [
-          { name: 'Синт-Лид', type: 'square', freq: 440, file: 'synth_lead', color: '#38bdf8' },
-          { name: 'Пэд', type: 'triangle', freq: 300, file: 'synth_pad', color: '#0ea5e9' },
-          { name: 'Арпеджио', type: 'sawtooth', freq: 523, file: 'synth_arp', color: '#0284c7' },
+          { name: 'Синт-Лид', type: 'square', freq: 440, file: 'synth_lead', color: '#0ea5e9' },
+          { name: 'Пэд', type: 'triangle', freq: 300, file: 'synth_pad', color: '#0284c7' },
+          { name: 'Арпеджио', type: 'sawtooth', freq: 523, file: 'synth_arp', color: '#0369a1' },
         ],
         brass: [
           { name: 'Саксофон', type: 'triangle', freq: 294, file: 'sax_1', color: '#a855f7' },
@@ -202,10 +241,10 @@
       };
 
       const tracks = [
-        { id: 'drums', name: 'Ударные', color: '#f97316' },
-        { id: 'cymbals', name: 'Тарелки', color: '#facc15' },
+        { id: 'drums', name: 'Ударные', color: '#ea580c' },
+        { id: 'cymbals', name: 'Тарелки', color: '#eab308' },
         { id: 'guitar', name: 'Гитара', color: '#22c55e' },
-        { id: 'synth', name: 'Синтезатор', color: '#38bdf8' },
+        { id: 'synth', name: 'Синтезатор', color: '#0ea5e9' },
         { id: 'brass', name: 'Духовые', color: '#a855f7' },
         { id: 'bass', name: 'Басс', color: '#ef4444' },
       ];
@@ -248,7 +287,11 @@
         }
       };
 
-      const state = { steps: 32, tempo: 110, currentStep: 0, isPlaying: false, timerId: null, loopEnabled: true, fx: { reverb: 10, echo: 0 }, sequence: {}, soundMap: {} };
+      const state = { 
+        steps: 32, tempo: 110, currentStep: 0, isPlaying: false, timerId: null, loopEnabled: true, fx: { reverb: 10, echo: 0 }, 
+        sequence: {}, soundMap: {},
+        activeBrush: null // НОВОЕ СВОЙСТВО: Какая кисть сейчас выбрана
+      };
 
       const els = {
         gridHeader: document.getElementById('gridHeader'), gridBody: document.getElementById('gridBody'), tempo: document.getElementById('tempo'), tempoValue: document.getElementById('tempoValue'),
@@ -289,61 +332,82 @@
 
         els.gridBody.innerHTML = tracks.map((track) => {
           const label = `<div class="track-label"><span>${track.name}</span><span class="instrument-dot" style="background:${track.color}"></span></div>`;
-          const cells = Array.from({ length: state.steps }, (_, step) => `<div class="cell ${step % 4 === 0 ? 'bar-start' : ''}" data-track="${track.id}" data-step="${step}"></div>`).join('');
+          const cells = Array.from({ length: state.steps }, (_, step) => `<div class="cell" data-track="${track.id}" data-step="${step}"></div>`).join('');
           return `<div class="grid-row">${label}${cells}</div>`;
         }).join('');
-        bindDropTargets();
       }
 
       function buildPalette() {
         const catNames = { drums: 'Ударные', cymbals: 'Тарелки', guitar: 'Гитара', synth: 'Синт', brass: 'Духовые', bass: 'Басс' };
         els.palette.innerHTML = Object.entries(soundLibrary).map(([cat, sounds]) => {
-          const chips = sounds.map((s) => `<div class="sound-chip" style="background:${s.color}" draggable="true" data-sound='${JSON.stringify({ ...s, category: cat })}'>${s.name}</div>`).join('');
+          const chips = sounds.map((s) => `<button class="sound-chip" style="background:${s.color}" data-sound='${JSON.stringify({ ...s, category: cat })}'>${s.name}</button>`).join('');
           return `<div class="palette-col"><strong>${catNames[cat]}</strong>${chips}</div>`;
         }).join('');
         
+        // ЛОГИКА ВЫБОРА КИСТИ (Вместо перетаскивания)
         els.palette.querySelectorAll('.sound-chip').forEach(chip => {
-          chip.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', chip.dataset.sound));
           chip.addEventListener('click', async () => {
             if (audioCtx.state === 'suspended') await audioCtx.resume();
+            
+            // Снимаем выделение со всех
+            document.querySelectorAll('.sound-chip').forEach(c => c.classList.remove('selected'));
+            
+            // Выделяем нажатую
+            chip.classList.add('selected');
+            
             const soundData = JSON.parse(chip.dataset.sound);
+            state.activeBrush = soundData; // Запомнили кисть
+            
+            // Проигрываем звук для превью
             await preloadAudioFile(soundData.file);
             playNoteRealtime(soundData);
-            els.status.textContent = `🔊 Прослушивание: ${soundData.name}`;
-            setTimeout(() => { if(els.status.textContent.startsWith('🔊')) els.status.textContent = 'Статус: готово к созданию музыки'; }, 1000);
-          });
-        });
-      }
-
-      function bindDropTargets() {
-        document.querySelectorAll('.cell').forEach((cell) => {
-          cell.addEventListener('dragover', (e) => { e.preventDefault(); cell.style.background = 'rgba(226, 232, 240, 0.9)'; });
-          cell.addEventListener('dragleave', () => cell.style.background = '');
-          cell.addEventListener('drop', (event) => {
-            event.preventDefault(); cell.style.background = '';
-            const raw = event.dataTransfer.getData('text/plain');
-            if (!raw) return;
-            const sound = JSON.parse(raw);
-            const trackId = cell.dataset.track;
             
-            if (sound.category !== trackId) {
-                const trackName = tracks.find(t => t.id === sound.category).name;
-                els.status.textContent = `❌ Ошибка: "${sound.name}" можно ставить только на дорожку "${trackName}"!`;
-                els.status.classList.add('error');
-                cell.classList.add('error-shake');
-                setTimeout(() => { els.status.textContent = 'Статус: готово к созданию музыки'; els.status.classList.remove('error'); cell.classList.remove('error-shake'); }, 3000);
-                return;
-            }
-
-            const step = Number(cell.dataset.step);
-            state.sequence[trackId][step] = true;
-            state.soundMap[trackId][step] = sound;
-            preloadAudioFile(sound.file);
-            renderGrid();
-            els.status.textContent = `✅ Добавлен: ${sound.name} на шаг ${step + 1}`;
+            els.status.textContent = `🖌️ Выбрана кисть: ${soundData.name}. Теперь кликайте по дорожке "${catNames[soundData.category]}"!`;
+            els.status.style.color = '#1d4ed8';
           });
         });
       }
+
+      // --- НОВАЯ ЛОГИКА РИСОВАНИЯ (КЛИК ПО СЕТКЕ) ---
+      els.gridBody.addEventListener('click', (e) => {
+        const cell = e.target.closest('.cell'); 
+        if (!cell) return;
+        
+        const trackId = cell.dataset.track; 
+        const step = Number(cell.dataset.step);
+
+        // 1. Если звук уже стоит - удаляем его (работает как ластик)
+        if (state.sequence[trackId][step]) { 
+            state.sequence[trackId][step] = false; 
+            state.soundMap[trackId][step] = null; 
+            renderGrid(); 
+            return; 
+        }
+
+        // 2. Если клетка пустая, проверяем, выбрана ли кисть
+        if (!state.activeBrush) {
+            els.status.textContent = `⚠️ Сначала выберите инструмент в меню внизу!`;
+            els.status.classList.add('error');
+            setTimeout(() => els.status.classList.remove('error'), 2000);
+            return;
+        }
+
+        // 3. Защита от дурака: проверяем ту ли дорожку кликнули
+        if (state.activeBrush.category !== trackId) {
+            const trackName = tracks.find(t => t.id === state.activeBrush.category).name;
+            els.status.textContent = `❌ Ошибка: "${state.activeBrush.name}" ставится только на дорожку "${trackName}"!`;
+            els.status.classList.add('error');
+            cell.classList.add('error-shake');
+            setTimeout(() => { els.status.classList.remove('error'); cell.classList.remove('error-shake'); }, 2000);
+            return;
+        }
+
+        // 4. Если всё правильно - ставим звук!
+        state.sequence[trackId][step] = true;
+        state.soundMap[trackId][step] = state.activeBrush;
+        preloadAudioFile(state.activeBrush.file);
+        renderGrid();
+      });
 
       window.clearGrid = function() {
         tracks.forEach(t => { state.sequence[t.id] = Array(state.steps).fill(false); state.soundMap[t.id] = Array(state.steps).fill(null); });
@@ -428,6 +492,17 @@
       function tick() {
         tracks.forEach(t => { if (state.sequence[t.id][state.currentStep]) playNoteRealtime(state.soundMap[t.id][state.currentStep]); });
         renderGrid();
+        
+        // Автоскролл сетки во время игры
+        const activeCell = document.querySelector(`.cell.playhead`);
+        if (activeCell) {
+            const wrap = els.gridBody.closest('.grid-wrap');
+            const offsetLeft = activeCell.offsetLeft;
+            if (offsetLeft > wrap.scrollLeft + wrap.clientWidth - 100 || offsetLeft < wrap.scrollLeft) {
+                wrap.scrollTo({ left: offsetLeft - 140, behavior: 'smooth' });
+            }
+        }
+
         if (!state.loopEnabled && state.currentStep === state.steps - 1) { stopPlayback(); return; }
         state.currentStep = (state.currentStep + 1) % state.steps;
       }
@@ -519,12 +594,6 @@
         els.status.textContent = '✅ Аудиофайл успешно скачан!';
       }
 
-      els.gridBody.addEventListener('click', (e) => {
-        const cell = e.target.closest('.cell'); if (!cell) return;
-        const tId = cell.dataset.track; const s = Number(cell.dataset.step);
-        if (state.sequence[tId][s]) { state.sequence[tId][s] = false; state.soundMap[tId][s] = null; renderGrid(); }
-      });
-
       els.tempo.addEventListener('input', () => { state.tempo = Number(els.tempo.value); els.tempoValue.value = state.tempo; if (state.isPlaying) { clearInterval(state.timerId); state.timerId = setInterval(tick, stepDurationMs()); }});
       els.stepsCount.addEventListener('change', () => { resetSequence(Number(els.stepsCount.value)); buildGrid(); renderGrid(); });
       els.loopEnabled.addEventListener('change', () => { state.loopEnabled = els.loopEnabled.checked; });
@@ -539,16 +608,6 @@
 
       resetSequence(32); els.tempoValue.value = state.tempo; els.reverbValue.value = state.fx.reverb; els.echoValue.value = state.fx.echo;
       buildGrid(); buildPalette(); renderGrid();
-
-      // --- ПРОВЕРКА НА ОШИБКУ ---
-      window.onload = () => {
-        const bgChecker = new Image();
-        bgChecker.onerror = function() {
-          alert("❌ ОШИБКА!\nСервер на GitHub всё ещё НЕ ВИДИТ картинку ./IMG/bg.png.\nТочно ли вы загрузили этот файл в репозиторий на GitHub?");
-        };
-        bgChecker.src = './IMG/bg.png';
-      };
-      // -------------------------------------
     </script>
   </body>
 </html>
