@@ -19,7 +19,7 @@
       
       body { margin: 0; background-color: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; }
       
-      /* --- ФОНОВЫЙ СЛОЙ (ПУТЬ ИСПРАВЛЕН НА ИДЕАЛЬНЫЙ) --- */
+      /* --- ФОНОВЫЙ СЛОЙ --- */
       .app-background {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -170,10 +170,11 @@
           { name: 'Ломаный', type: 'triangle', freq: 100, file: 'kick_2', color: '#ea580c' },
           { name: 'Глухой', type: 'square', freq: 80, file: 'kick_3', color: '#c2410c' },
         ],
+        // --- ОБНОВЛЕННЫЕ ТАРЕЛКИ (С КРЭШЕМ) ---
         cymbals: [
-          { name: 'Хэт', type: 'square', freq: 2000, file: 'hat_1', color: '#facc15' },
+          { name: 'Хэт', type: 'square', freq: 2000, file: 'hat_closed_1', color: '#facc15' },
           { name: 'Клэп', type: 'triangle', freq: 900, file: 'clap_1', color: '#eab308' },
-          { name: 'Шейкер', type: 'sawtooth', freq: 2500, file: 'shaker_1', color: '#ca8a04' },
+          { name: 'Крэш', type: 'sawtooth', freq: 3000, file: 'crash_1', color: '#ca8a04' },
         ],
         guitar: [
           { name: 'Классика', type: 'triangle', freq: 330, file: 'guitar_acoustic', color: '#22c55e' },
@@ -206,7 +207,7 @@
         { id: 'bass', name: 'Басс', color: '#ef4444' },
       ];
 
-      // --- ГОТОВЫЕ ШАБЛОНЫ МЕЛОДИЙ ---
+      // --- ГОТОВЫЕ ШАБЛОНЫ (ОБНОВЛЕНЫ ПОД КРЭШ) ---
       const appPresets = {
         beat: {
           name: "Прямой бит", tempo: 115, steps: 16,
@@ -225,6 +226,7 @@
             {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
             {t: 'cymbals', s: 2, i: 0}, {t: 'cymbals', s: 6, i: 0}, {t: 'cymbals', s: 10, i: 0}, {t: 'cymbals', s: 14, i: 0},
             {t: 'cymbals', s: 18, i: 0}, {t: 'cymbals', s: 22, i: 0}, {t: 'cymbals', s: 26, i: 0}, {t: 'cymbals', s: 30, i: 0},
+            {t: 'cymbals', s: 0, i: 2}, /* Мощный Крэш на старте! */
             {t: 'bass', s: 2, i: 2}, {t: 'bass', s: 6, i: 2}, {t: 'bass', s: 10, i: 2}, {t: 'bass', s: 14, i: 2},
             {t: 'bass', s: 18, i: 2}, {t: 'bass', s: 22, i: 2}, {t: 'bass', s: 26, i: 2}, {t: 'bass', s: 30, i: 2},
             {t: 'synth', s: 0, i: 1}, {t: 'synth', s: 16, i: 1}
@@ -235,9 +237,10 @@
           data: [
             {t: 'drums', s: 0, i: 1}, {t: 'drums', s: 10, i: 1}, {t: 'drums', s: 16, i: 1}, {t: 'drums', s: 26, i: 1},
             {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
-            {t: 'cymbals', s: 0, i: 2}, {t: 'cymbals', s: 8, i: 2}, {t: 'cymbals', s: 16, i: 2}, {t: 'cymbals', s: 24, i: 2}, 
+            {t: 'cymbals', s: 0, i: 2}, /* Мощный Крэш на старте! */
+            {t: 'cymbals', s: 8, i: 0}, {t: 'cymbals', s: 16, i: 0}, {t: 'cymbals', s: 24, i: 0}, 
             {t: 'guitar', s: 4, i: 2}, {t: 'guitar', s: 12, i: 2}, {t: 'guitar', s: 20, i: 2}, {t: 'guitar', s: 28, i: 2},
-            {t: 'brass', s: 14, i: 1}, {t: 'brass', s: 15, i: 1}, {t: 'brass', s: 30, i: 1}, {t: 'brass', s: 31, i: 1},
+            {t: 'brass', s: 14, i: 1}, {t: 'brass', s: 15, i: 1}, {t: 'brass', s: 30, i: 1}, {t: 'brass', s: 31, i: 1}, /* Трубы двойные */
             {t: 'bass', s: 0, i: 1}, {t: 'bass', s: 3, i: 1}, {t: 'bass', s: 8, i: 1}, {t: 'bass', s: 16, i: 1}, {t: 'bass', s: 19, i: 1}, {t: 'bass', s: 24, i: 1}
           ]
         }
@@ -534,16 +537,6 @@
 
       resetSequence(32); els.tempoValue.value = state.tempo; els.reverbValue.value = state.fx.reverb; els.echoValue.value = state.fx.echo;
       buildGrid(); buildPalette(); renderGrid();
-
-      // --- НЕВИДИМАЯ ПРОВЕРКА ФАЙЛА ФОНА ---
-      window.onload = () => {
-        const bgChecker = new Image();
-        bgChecker.onerror = function() {
-          alert("❌ ОШИБКА!\nСервер на GitHub НЕ ВИДИТ картинку.\n\nПожалуйста, убедитесь, что:\n1. Папка называется строго большими буквами: IMG\n2. Файл называется строго маленькими буквами: bg.png");
-        };
-        bgChecker.src = './IMG/bg.png';
-      };
-      // -------------------------------------
     </script>
   </body>
 </html>
