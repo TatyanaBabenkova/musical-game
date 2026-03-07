@@ -162,6 +162,20 @@
     </main>
 
     <script>
+
+// --- ВРЕМЕННАЯ ПРОВЕРКА ФОНА ---
+      const bgChecker = new Image();
+      bgChecker.onload = function() {
+        alert("✅ УРА! Файл bg.png НАЙДЕН сервером!");
+      };
+      bgChecker.onerror = function() {
+        alert("❌ ОШИБКА! Сервер НЕ ВИДИТ файл bg.png.\n\nПроверьте: точно ли он называется маленькими буквами (bg.png, а не bg.PNG) и лежит ли он в той же папке, что и index.html.");
+        // Делаем временную красную заливку фона, чтобы было видно, что слой вообще работает
+        document.querySelector('.app-background').style.backgroundColor = 'rgba(255, 0, 0, 0.2)'; 
+      };
+      bgChecker.src = 'bg.png';
+      // -------------------------------
+      
       const NOTE_VOLUME = 0.3;
 
       const soundLibrary = {
