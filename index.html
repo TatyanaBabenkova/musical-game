@@ -7,30 +7,34 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f0f4f8; --panel: rgba(255, 255, 255, 0.95); --panel-soft: rgba(248, 250, 252, 0.9);
+        --bg: #f0f4f8; 
+        /* Делаем панели чуть прозрачными, чтобы фон красиво просвечивал */
+        --panel: rgba(255, 255, 255, 0.92); 
+        --panel-soft: rgba(248, 250, 252, 0.85);
         --line: #cbd5e1; --accent: #3b82f6; --accent-2: #10b981;
         --danger: #ef4444; --text: #1e293b; --muted: #64748b;
       }
       * { box-sizing: border-box; }
       
-      /* --- НАСТРОЙКА ФОНА --- */
-      body { margin: 0; background-color: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; position: relative; z-index: 0; }
-      body::before {
-        content: '';
+      body { margin: 0; background-color: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; }
+      
+      /* --- НАДЕЖНЫЙ ФОНОВЫЙ СЛОЙ --- */
+      .app-background {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('./img/bg.png'); /* Вернули ваш .jpg */
+        background-image: url('./img/bg.png'); /* ФАЙЛ PNG */
         background-size: cover; 
         background-position: center;
-        opacity: 0.8; /* Картинка уже бледная, делаем её видимой на 80% */
-        mix-blend-mode: multiply; /* Убирает белый фон картинки, оставляя только ноты */
-        z-index: -1; 
-        pointer-events: none;
+        background-repeat: no-repeat;
+        /* Если картинка слишком бледная, увеличьте до 0.3 или 0.4. Если яркая - 0.05 */
+        opacity: 0.15; 
+        z-index: -1; /* Прячем позади игры */
+        pointer-events: none; /* Чтобы не перекрывала клики */
       }
       /* ----------------------- */
 
-      .app { max-width: 1540px; margin: 20px auto; padding: 14px; }
-      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); backdrop-filter: blur(8px); }
+      .app { max-width: 1540px; margin: 20px auto; padding: 14px; position: relative; z-index: 1;}
+      .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px); }
       .toolbar, .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
       .toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
       
@@ -46,19 +50,19 @@
       .tempo, .fx-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;}
       .tempo output, .fx-item output { min-width: 30px; color: var(--accent); font-weight: bold;}
       
-      .grid-wrap { border: 1px solid var(--line); border-radius: 14px; overflow: auto; max-height: 55vh; background: var(--panel-soft); }
+      .grid-wrap { border: 1px solid var(--line); border-radius: 14px; overflow: auto; max-height: 55vh; background: var(--panel-soft); backdrop-filter: blur(5px); }
       .grid-header, .grid-row { display: grid; grid-template-columns: 200px repeat(var(--steps), minmax(30px, 1fr)); min-width: max-content; }
-      .grid-header { position: sticky; top: 0; z-index: 2; background: #e2e8f0; }
+      .grid-header { position: sticky; top: 0; z-index: 2; background: rgba(226, 232, 240, 0.95); backdrop-filter: blur(4px); }
       .grid-header div, .grid-row > div { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 40px; }
       .grid-header .step { display: grid; place-items: center; font-size: 12px; color: var(--muted); font-weight: bold;}
       
-      .track-label { padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; background: #f8fafc; }
+      .track-label { padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; background: rgba(248, 250, 252, 0.8); }
       .instrument-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 1px 3px rgba(0,0,0,0.2);}
       
-      .cell { background: #ffffff; cursor: pointer; position: relative; transition: background 0.1s;}
-      .cell.bar-start { box-shadow: -2px 0 0 0 #e2e8f0 inset; }
-      .cell:hover { background: #f1f5f9; }
-      .cell.active { background: #e0f2fe; }
+      .cell { background: rgba(255, 255, 255, 0.6); cursor: pointer; position: relative; transition: background 0.1s;}
+      .cell.bar-start { box-shadow: -2px 0 0 0 rgba(226, 232, 240, 0.8) inset; }
+      .cell:hover { background: rgba(241, 245, 249, 0.8); }
+      .cell.active { background: rgba(224, 242, 254, 0.9); }
       .cell.playhead::after { content: ''; position: absolute; inset: 0; border: 2px solid rgba(59, 130, 246, 0.8); background: rgba(59, 130, 246, 0.1); pointer-events: none; }
       .cell.error-shake { background: #fee2e2; }
       
@@ -67,7 +71,7 @@
       .meta { margin-top: 15px; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; font-weight: 500; }
       #status { transition: color 0.3s; }
       #status.error { color: var(--danger); font-weight: bold; }
-      .hint { margin-top: 5px; font-size: 13px; color: #3b82f6; background: rgba(239, 246, 255, 0.9); padding: 10px; border-radius: 8px;}
+      .hint { margin-top: 5px; font-size: 13px; color: #3b82f6; background: rgba(239, 246, 255, 0.85); padding: 10px; border-radius: 8px;}
       
       .palette { margin-top: 20px; border-top: 2px dashed var(--line); padding-top: 15px; }
       .palette h3 { margin: 0 0 12px; font-size: 16px; color: var(--text); }
@@ -81,6 +85,8 @@
     </style>
   </head>
   <body>
+    <div class="app-background"></div>
+
     <main class="app">
       <section class="panel">
         <div class="toolbar">
@@ -256,7 +262,7 @@
 
       function bindDropTargets() {
         document.querySelectorAll('.cell').forEach((cell) => {
-          cell.addEventListener('dragover', (e) => { e.preventDefault(); cell.style.background = '#e2e8f0'; });
+          cell.addEventListener('dragover', (e) => { e.preventDefault(); cell.style.background = 'rgba(226, 232, 240, 0.9)'; });
           cell.addEventListener('dragleave', () => cell.style.background = '');
           cell.addEventListener('drop', (event) => {
             event.preventDefault(); cell.style.background = '';
