@@ -3,252 +3,141 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Музыкальная игра — расширенный секвенсор</title>
+    <title>Музыкальная игра Попутчик</title>
     <style>
       :root {
-        color-scheme: dark;
-        --bg: #0f1117;
-        --panel: #1a1f2b;
-        --panel-soft: #232a3a;
-        --line: #313a4f;
-        --accent: #7c9bff;
-        --accent-2: #45d7c7;
-        --danger: #ff6b81;
-        --text: #e6e9f2;
-        --muted: #9aa3bd;
+        color-scheme: light;
+        --bg: #f0f4f8;
+        --panel: #ffffff;
+        --panel-soft: #f8fafc;
+        --line: #cbd5e1;
+        --accent: #3b82f6;
+        --accent-2: #10b981;
+        --danger: #ef4444;
+        --text: #1e293b;
+        --muted: #64748b;
       }
 
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
 
       body {
         margin: 0;
-        background: radial-gradient(circle at top, #171d2d, var(--bg) 40%);
+        background: var(--bg);
         color: var(--text);
         font-family: Inter, Segoe UI, sans-serif;
       }
 
-      .app {
-        max-width: 1540px;
-        margin: 20px auto;
-        padding: 14px;
-      }
+      .app { max-width: 1540px; margin: 20px auto; padding: 14px; }
 
       .panel {
-        background: rgba(26, 31, 43, 0.94);
+        background: var(--panel);
         border: 1px solid var(--line);
         border-radius: 16px;
-        padding: 14px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
       }
 
-      .toolbar,
-      .fx-row,
-      .note-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
+      .toolbar, .fx-row {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 10px; flex-wrap: wrap; margin-bottom: 15px;
       }
 
-      .toolbar-group {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
+      .toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-      button,
-      input,
-      select {
+      button, input, select {
         border: 1px solid var(--line);
         background: var(--panel-soft);
         color: var(--text);
         border-radius: 10px;
-        padding: 8px 12px;
+        padding: 8px 14px;
         font: inherit;
+        transition: all 0.2s;
       }
 
-      button {
-        cursor: pointer;
-      }
-
-      button:hover {
-        border-color: var(--accent);
-      }
-
+      button { cursor: pointer; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+      button:hover { border-color: var(--accent); background: #f1f5f9; }
+      
       button[data-state='active'] {
         border-color: var(--accent-2);
+        background: #ecfdf5;
+        color: #065f46;
         box-shadow: 0 0 0 1px var(--accent-2) inset;
       }
 
-      .primary {
-        background: linear-gradient(130deg, #3f63ff, #6f86ff);
-        border: 0;
-      }
+      .primary { background: #3b82f6; color: white; border: 0; }
+      .primary:hover { background: #2563eb; color: white; }
+      .danger { border-color: #ef4444; color: #b91c1c; }
 
-      .danger {
-        border-color: #7b3142;
-        color: #ffc1cc;
-      }
-
-      .tempo,
-      .fx-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .tempo output,
-      .fx-item output {
-        min-width: 44px;
-        color: var(--accent-2);
-      }
+      .tempo, .fx-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;}
+      .tempo output, .fx-item output { min-width: 30px; color: var(--accent); font-weight: bold;}
 
       .grid-wrap {
         border: 1px solid var(--line);
         border-radius: 14px;
         overflow: auto;
-        max-height: 62vh;
+        max-height: 55vh;
+        background: var(--panel-soft);
       }
 
-      .grid-header,
-      .grid-row {
+      .grid-header, .grid-row {
         display: grid;
-        grid-template-columns: 220px repeat(var(--steps), minmax(24px, 1fr));
+        grid-template-columns: 200px repeat(var(--steps), minmax(30px, 1fr));
         min-width: max-content;
       }
 
-      .grid-header {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        background: #1b2231;
-      }
+      .grid-header { position: sticky; top: 0; z-index: 2; background: #e2e8f0; }
 
-      .grid-header div,
-      .grid-row > div {
+      .grid-header div, .grid-row > div {
         border-right: 1px solid var(--line);
         border-bottom: 1px solid var(--line);
-        min-height: 30px;
+        min-height: 40px;
       }
 
-      .grid-header .step {
-        display: grid;
-        place-items: center;
-        font-size: 11px;
-        color: var(--muted);
-      }
+      .grid-header .step { display: grid; place-items: center; font-size: 12px; color: var(--muted); font-weight: bold;}
 
       .track-label {
-        padding: 6px 8px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        font-size: 13px;
+        padding: 6px 12px; display: flex; align-items: center; justify-content: space-between;
+        font-size: 14px; font-weight: 600; background: #f8fafc;
       }
 
-      .track-label span[data-drop='true'] {
-        border-bottom: 1px dashed transparent;
-      }
+      .instrument-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 1px 3px rgba(0,0,0,0.2);}
 
-      .track-label.drag-over span[data-drop='true'] {
-        border-color: var(--accent-2);
-      }
-
-      .instrument-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        display: inline-block;
-      }
-
-      .cell {
-        background: #171d2a;
-        cursor: pointer;
-        position: relative;
-      }
-
-      .cell.bar-start {
-        box-shadow: -1px 0 0 0 #5f6a88 inset;
-      }
-
-      .cell.active {
-        background: linear-gradient(180deg, rgba(69, 215, 199, 0.25), rgba(69, 215, 199, 0.52));
-      }
-
+      .cell { background: #ffffff; cursor: pointer; position: relative; transition: background 0.1s;}
+      .cell.bar-start { box-shadow: -2px 0 0 0 #e2e8f0 inset; }
+      .cell:hover { background: #f1f5f9; }
+      
+      .cell.active { background: #e0f2fe; }
       .cell.playhead::after {
-        content: '';
-        position: absolute;
-        inset: 1px;
-        border: 1px solid rgba(124, 155, 255, 0.95);
-        border-radius: 4px;
+        content: ''; position: absolute; inset: 0;
+        border: 2px solid rgba(59, 130, 246, 0.8);
+        background: rgba(59, 130, 246, 0.1);
+        pointer-events: none;
       }
 
-      .meta {
-        margin-top: 10px;
-        color: var(--muted);
-        font-size: 13px;
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        flex-wrap: wrap;
+      /* Красивые блоки со звуком в сетке */
+      .cell-content {
+        position: absolute; inset: 2px; border-radius: 4px; display: flex;
+        align-items: center; justify-content: center; font-size: 10px; color: white;
+        font-weight: bold; overflow: hidden; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4);
       }
 
-      .hint {
-        margin-top: 10px;
-        font-size: 12px;
-        color: #8f99b6;
-      }
+      .meta { margin-top: 15px; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; font-weight: 500; }
+      .hint { margin-top: 5px; font-size: 13px; color: #3b82f6; background: #eff6ff; padding: 10px; border-radius: 8px;}
 
-      .palette {
-        margin-top: 12px;
-        border-top: 1px solid var(--line);
-        padding-top: 10px;
-      }
-
-      .palette h3 {
-        margin: 0 0 8px;
-        font-size: 14px;
-        color: var(--muted);
-      }
-
-      .palette-grid {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(150px, 1fr));
-        gap: 10px;
-      }
-
-      .palette-col {
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 8px;
-        background: rgba(26, 31, 43, 0.7);
-      }
-
-      .palette-col strong {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 12px;
-        color: var(--muted);
-      }
-
+      .palette { margin-top: 20px; border-top: 2px dashed var(--line); padding-top: 15px; }
+      .palette h3 { margin: 0 0 12px; font-size: 16px; color: var(--text); }
+      .palette-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+      .palette-col { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--panel-soft); }
+      .palette-col strong { display: block; margin-bottom: 10px; font-size: 13px; color: var(--text); text-align: center; text-transform: uppercase; letter-spacing: 0.5px;}
+      
       .sound-chip {
-        border: 1px solid #3c4760;
-        border-radius: 8px;
-        padding: 6px 8px;
-        margin-bottom: 6px;
-        font-size: 12px;
-        cursor: grab;
+        border: none; border-radius: 6px; padding: 8px 6px; margin-bottom: 8px;
+        font-size: 12px; cursor: grab; color: white; font-weight: 600; text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: transform 0.1s; text-shadow: 0 1px 1px rgba(0,0,0,0.3);
       }
-
-      .sound-chip:last-child {
-        margin-bottom: 0;
-      }
+      .sound-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+      .sound-chip:active { cursor: grabbing; }
+      .sound-chip:last-child { margin-bottom: 0; }
     </style>
   </head>
   <body>
@@ -257,36 +146,30 @@
         <div class="toolbar">
           <div class="toolbar-group">
             <button id="playBtn" class="primary">▶ Play</button>
-            <button id="recBtn">⏺ Rec</button>
             <button id="stopBtn" class="danger">■ Stop</button>
           </div>
 
           <div class="toolbar-group">
-            <label for="stepsCount">Шагов:</label>
+            <label for="stepsCount">Длина:</label>
             <select id="stepsCount">
-              <option value="16">16</option>
-              <option value="32" selected>32</option>
-              <option value="64">64</option>
-              <option value="96">96</option>
-              <option value="128">128</option>
+              <option value="16">16 шагов</option>
+              <option value="32" selected>32 шага</option>
+              <option value="64">64 шага</option>
             </select>
-            <input id="trackName" type="text" placeholder="Название трека" value="Демо-трек" />
-            <button id="saveAudio">Сохранить WAV (3 мин)</button>
-            <button id="saveProject">Сохранить проект</button>
-            <button id="loadLocal">Загрузить</button>
-            <button id="exportJson">Экспорт JSON</button>
+            <input id="trackName" type="text" placeholder="Название трека" value="Мой Хит" />
+            <button id="saveProject">💾 Сохранить проект</button>
+            <button id="loadLocal">📂 Загрузить</button>
           </div>
         </div>
 
         <div class="fx-row">
           <div class="fx-item tempo">
-            <label for="tempo">Темп:</label>
+            <label for="tempo">Темп (BPM):</label>
             <input id="tempo" type="range" min="80" max="160" value="110" />
             <output id="tempoValue">110</output>
-            <span>bpm</span>
           </div>
           <div class="fx-item">
-            <label><input id="loopEnabled" type="checkbox" checked /> Луп</label>
+            <label><input id="loopEnabled" type="checkbox" checked /> Луп (повтор)</label>
           </div>
           <div class="fx-item">
             <label for="reverb">Реверб:</label>
@@ -298,36 +181,11 @@
             <input id="echo" type="range" min="0" max="70" value="0" />
             <output id="echoValue">0</output>
           </div>
-          <div class="fx-item">
-            <label for="chorus">Хорус:</label>
-            <input id="chorus" type="range" min="0" max="40" value="0" />
-            <output id="chorusValue">0</output>
-          </div>
         </div>
 
-        <div class="note-row">
-          <div class="toolbar-group">
-            <strong style="font-size:12px;color:var(--muted)">Добавление ноты</strong>
-            <label for="noteTrack">Дорожка:</label>
-            <select id="noteTrack"></select>
-            <label for="notePitch">Нота:</label>
-            <select id="notePitch"></select>
-            <label for="noteStep">Шаг:</label>
-            <input id="noteStep" type="number" min="1" value="1" style="width:72px" />
-            <label for="noteLen">Длина:</label>
-            <select id="noteLen">
-              <option value="1">1 шаг</option>
-              <option value="2">2 шага</option>
-              <option value="4">4 шага</option>
-            </select>
-            <button id="addNoteBtn">Добавить ноту</button>
-          </div>
-          <div class="toolbar-group">
-            <strong style="font-size:12px;color:var(--muted)">Готовые мелодии</strong>
-            <button id="presetYolochka">В лесу родилась ёлочка</button>
-            <button id="presetKatyusha">Катюша</button>
-          </div>
-        </div>
+        <p class="hint">
+          💡 <b>Как играть:</b> Перетаскивайте цветные блоки инструментов из палитры внизу прямо на пустые клеточки сетки. Чтобы удалить звук, просто кликните по клеточке.
+        </p>
 
         <div class="grid-wrap">
           <div class="grid-header" id="gridHeader"></div>
@@ -335,63 +193,61 @@
         </div>
 
         <div class="meta">
-          <span id="status">Статус: готово</span>
+          <span id="status">Статус: готово к созданию музыки</span>
           <span id="barInfo">Текущий шаг: —</span>
         </div>
 
-        <p class="hint">
-          Перетащите инструмент снизу прямо на конкретную ячейку сетки, чтобы назначить тембр именно этому шагу. Добавляйте ноты в панели выше.
-        </p>
-
         <div class="palette">
-          <h3>Палитра инструментов (drag&drop)</h3>
+          <h3>Палитра инструментов (Инвентарь)</h3>
           <div class="palette-grid" id="palette"></div>
         </div>
       </section>
     </main>
 
     <script>
-      const NOTE_ATTACK = 0.01;
-      const NOTE_DECAY = 0.28;
-      const NOTE_VOLUME = 0.2;
-      const WAV_EXPORT_DURATION_SECONDS = 180;
-      const WAV_SAMPLE_RATE = 22050;
+      const NOTE_VOLUME = 0.3;
 
+      // 1. БАЗА ЗВУКОВ. Свойство file указывает, какой .wav файл искать в папке sounds/
       const soundLibrary = {
         drums: [
-          { name: 'Бочка', type: 'sine', freq: 65, color: '#f97316' },
-          { name: 'Лоутом', type: 'triangle', freq: 110, color: '#fb923c' },
-          { name: 'Том', type: 'square', freq: 140, color: '#f59e0b' },
+          { name: 'Бочка', type: 'sine', freq: 60, file: 'kick_1', color: '#f97316' },
+          { name: 'Ломаный бит', type: 'triangle', freq: 100, file: 'kick_2', color: '#ea580c' },
+          { name: 'Глухой', type: 'square', freq: 80, file: 'kick_3', color: '#c2410c' },
         ],
         cymbals: [
-          { name: 'Хэт', type: 'square', freq: 1900, color: '#facc15' },
-          { name: 'Клэп', type: 'triangle', freq: 900, color: '#fde047' },
-          { name: 'Крэш', type: 'sawtooth', freq: 2200, color: '#eab308' },
+          { name: 'Хэт', type: 'square', freq: 2000, file: 'hat_1', color: '#facc15' },
+          { name: 'Клэп', type: 'triangle', freq: 900, file: 'clap_1', color: '#eab308' },
+          { name: 'Шейкер', type: 'sawtooth', freq: 2500, file: 'shaker_1', color: '#ca8a04' },
         ],
         guitar: [
-          { name: 'Гитара классика', type: 'triangle', freq: 220, color: '#22c55e' },
-          { name: 'Гитара электро', type: 'sawtooth', freq: 246, color: '#16a34a' },
-          { name: 'Рифф', type: 'square', freq: 196, color: '#15803d' },
+          { name: 'Классика', type: 'triangle', freq: 330, file: 'guitar_acoustic', color: '#22c55e' },
+          { name: 'Электро', type: 'sawtooth', freq: 246, file: 'guitar_electro', color: '#16a34a' },
+          { name: 'Аккорд', type: 'square', freq: 196, file: 'guitar_chord', color: '#15803d' },
         ],
         synth: [
-          { name: 'Синт-пэд', type: 'triangle', freq: 300, color: '#38bdf8' },
-          { name: 'Синт-лид', type: 'square', freq: 440, color: '#0ea5e9' },
-          { name: 'Арп', type: 'sawtooth', freq: 523, color: '#0284c7' },
+          { name: 'Синт-Лид', type: 'square', freq: 440, file: 'synth_lead', color: '#38bdf8' },
+          { name: 'Пэд', type: 'triangle', freq: 300, file: 'synth_pad', color: '#0ea5e9' },
+          { name: 'Арпеджио', type: 'sawtooth', freq: 523, file: 'synth_arp', color: '#0284c7' },
         ],
         brass: [
-          { name: 'Духовые', type: 'square', freq: 262, color: '#a78bfa' },
-          { name: 'Сакс', type: 'triangle', freq: 294, color: '#8b5cf6' },
-          { name: 'Бас', type: 'sine', freq: 110, color: '#ef4444' },
+          { name: 'Саксофон', type: 'triangle', freq: 294, file: 'sax_1', color: '#a855f7' },
+          { name: 'Труба', type: 'square', freq: 349, file: 'trumpet_1', color: '#9333ea' },
+          { name: 'Горн', type: 'sawtooth', freq: 261, file: 'horn_1', color: '#7e22ce' },
         ],
+        bass: [
+          { name: 'Суб-Басс', type: 'sine', freq: 55, file: 'bass_sub', color: '#ef4444' },
+          { name: 'Слэп', type: 'triangle', freq: 110, file: 'bass_slap', color: '#dc2626' },
+          { name: 'Синт-Басс', type: 'square', freq: 82, file: 'bass_synth', color: '#b91c1c' },
+        ]
       };
 
       const tracks = [
-        { id: 'drums', name: 'Ударные', category: 'drums', color: '#f97316', freq: 65, type: 'sine' },
-        { id: 'cymbals', name: 'Тарелки', category: 'cymbals', color: '#facc15', freq: 1900, type: 'square' },
-        { id: 'guitar', name: 'Гитара', category: 'guitar', color: '#22c55e', freq: 220, type: 'sawtooth' },
-        { id: 'synth', name: 'Синтезатор', category: 'synth', color: '#38bdf8', freq: 300, type: 'triangle' },
-        { id: 'brass', name: 'Духовые', category: 'brass', color: '#a78bfa', freq: 262, type: 'square' },
-        { id: 'bass', name: 'Басс', category: 'brass', color: '#ef4444', freq: 110, type: 'sine' },
+        { id: 'drums', name: 'Ударные', color: '#f97316' },
+        { id: 'cymbals', name: 'Тарелки', color: '#facc15' },
+        { id: 'guitar', name: 'Гитара', color: '#22c55e' },
+        { id: 'synth', name: 'Синтезатор', color: '#38bdf8' },
+        { id: 'brass', name: 'Духовые', color: '#a855f7' },
+        { id: 'bass', name: 'Басс', color: '#ef4444' },
       ];
 
       const state = {
@@ -399,20 +255,12 @@
         tempo: 110,
         currentStep: 0,
         isPlaying: false,
-        isRecording: false,
         timerId: null,
         loopEnabled: true,
-        fx: { reverb: 10, echo: 0, chorus: 0 },
+        fx: { reverb: 10, echo: 0 },
         sequence: {},
-        pitchMap: {},
-        gateMap: {},
         soundMap: {},
       };
-
-      const noteOptions = [
-        ['C4', 60], ['D4', 62], ['E4', 64], ['F4', 65], ['G4', 67], ['A4', 69], ['B4', 71],
-        ['C5', 72], ['D5', 74], ['E5', 76],
-      ];
 
       const els = {
         gridHeader: document.getElementById('gridHeader'),
@@ -420,12 +268,9 @@
         tempo: document.getElementById('tempo'),
         tempoValue: document.getElementById('tempoValue'),
         playBtn: document.getElementById('playBtn'),
-        recBtn: document.getElementById('recBtn'),
         stopBtn: document.getElementById('stopBtn'),
-        saveAudio: document.getElementById('saveAudio'),
         saveProject: document.getElementById('saveProject'),
         loadLocal: document.getElementById('loadLocal'),
-        exportJson: document.getElementById('exportJson'),
         trackName: document.getElementById('trackName'),
         status: document.getElementById('status'),
         barInfo: document.getElementById('barInfo'),
@@ -435,145 +280,71 @@
         reverbValue: document.getElementById('reverbValue'),
         echo: document.getElementById('echo'),
         echoValue: document.getElementById('echoValue'),
-        chorus: document.getElementById('chorus'),
-        chorusValue: document.getElementById('chorusValue'),
-        noteTrack: document.getElementById('noteTrack'),
-        notePitch: document.getElementById('notePitch'),
-        noteStep: document.getElementById('noteStep'),
-        noteLen: document.getElementById('noteLen'),
-        addNoteBtn: document.getElementById('addNoteBtn'),
-        presetYolochka: document.getElementById('presetYolochka'),
-        presetKatyusha: document.getElementById('presetKatyusha'),
         palette: document.getElementById('palette'),
       };
 
-      const presets = {
-        yolochka: {
-          name: 'В лесу родилась ёлочка',
-          tempo: 98,
-          notes: [
-            { trackId: 'synth', step: 0, midi: 64, len: 2 },
-            { trackId: 'synth', step: 4, midi: 64, len: 2 },
-            { trackId: 'synth', step: 8, midi: 67, len: 2 },
-            { trackId: 'synth', step: 12, midi: 67, len: 2 },
-            { trackId: 'synth', step: 16, midi: 69, len: 2 },
-            { trackId: 'synth', step: 20, midi: 69, len: 2 },
-            { trackId: 'synth', step: 24, midi: 67, len: 4 },
-            { trackId: 'synth', step: 32, midi: 65, len: 2 },
-            { trackId: 'synth', step: 36, midi: 65, len: 2 },
-            { trackId: 'synth', step: 40, midi: 64, len: 2 },
-            { trackId: 'synth', step: 44, midi: 64, len: 2 },
-            { trackId: 'synth', step: 48, midi: 62, len: 2 },
-            { trackId: 'synth', step: 52, midi: 62, len: 2 },
-            { trackId: 'synth', step: 56, midi: 60, len: 4 },
-          ],
-          rhythm: {
-            drums: [0, 16, 32, 48],
-            cymbals: [4, 12, 20, 28, 36, 44, 52, 60],
-            bass: [0, 12, 16, 28, 32, 44, 48, 60],
-          },
-        },
-        katyusha: {
-          name: 'Катюша',
-          tempo: 114,
-          notes: [
-            { trackId: 'synth', step: 0, midi: 67, len: 2 },
-            { trackId: 'synth', step: 4, midi: 71, len: 2 },
-            { trackId: 'synth', step: 8, midi: 72, len: 2 },
-            { trackId: 'synth', step: 12, midi: 74, len: 2 },
-            { trackId: 'synth', step: 16, midi: 72, len: 2 },
-            { trackId: 'synth', step: 20, midi: 71, len: 2 },
-            { trackId: 'synth', step: 24, midi: 69, len: 4 },
-            { trackId: 'synth', step: 32, midi: 67, len: 2 },
-            { trackId: 'synth', step: 36, midi: 69, len: 2 },
-            { trackId: 'synth', step: 40, midi: 71, len: 2 },
-            { trackId: 'synth', step: 44, midi: 72, len: 2 },
-            { trackId: 'synth', step: 48, midi: 74, len: 2 },
-            { trackId: 'synth', step: 52, midi: 72, len: 2 },
-            { trackId: 'synth', step: 56, midi: 71, len: 2 },
-            { trackId: 'synth', step: 60, midi: 69, len: 4 },
-          ],
-          rhythm: {
-            drums: [0, 8, 16, 24, 32, 40, 48, 56],
-            cymbals: [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62],
-            bass: [0, 16, 32, 48],
-          },
-        },
-      };
-
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const audioCache = {}; // Кэш для загруженных файлов
 
-      function midiToFreq(midi) {
-        return 440 * 2 ** ((midi - 69) / 12);
+      // Функция попытки загрузить WAV файл
+      async function preloadAudioFile(fileName) {
+        if (audioCache[fileName]) return; // Уже загружено или не найдено
+        try {
+            const response = await fetch(`./sounds/${fileName}.wav`);
+            if (!response.ok) throw new Error('File missing');
+            const arrayBuffer = await response.arrayBuffer();
+            const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
+            audioCache[fileName] = decodedData; // Сохраняем успешный файл
+        } catch (error) {
+            audioCache[fileName] = 'fallback'; // Помечаем, что файла нет
+        }
       }
 
-      function clamp(value, min, max) {
-        return Math.min(max, Math.max(min, value));
-      }
+      function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
 
       function resetSequence(newSteps) {
         state.steps = newSteps;
         document.documentElement.style.setProperty('--steps', String(newSteps));
-        const next = {};
-        const nextPitch = {};
-        const nextGate = {};
+        const nextSeq = {};
         const nextSound = {};
         tracks.forEach((track) => {
-          const old = state.sequence[track.id] || [];
-          const oldPitch = state.pitchMap[track.id] || [];
-          const oldGate = state.gateMap[track.id] || [];
+          const oldSeq = state.sequence[track.id] || [];
           const oldSound = state.soundMap[track.id] || [];
-          next[track.id] = Array.from({ length: newSteps }, (_, i) => Boolean(old[i]));
-          nextPitch[track.id] = Array.from({ length: newSteps }, (_, i) => oldPitch[i] ?? null);
-          nextGate[track.id] = Array.from({ length: newSteps }, (_, i) => oldGate[i] ?? 1);
+          nextSeq[track.id] = Array.from({ length: newSteps }, (_, i) => Boolean(oldSeq[i]));
           nextSound[track.id] = Array.from({ length: newSteps }, (_, i) => oldSound[i] ?? null);
         });
-        state.sequence = next;
-        state.pitchMap = nextPitch;
-        state.gateMap = nextGate;
+        state.sequence = nextSeq;
         state.soundMap = nextSound;
         if (state.currentStep >= newSteps) state.currentStep = 0;
       }
 
       function buildGrid() {
         const headerCells = ['<div class="track-label">Инструмент</div>'];
-        for (let i = 1; i <= state.steps; i += 1) {
-          headerCells.push(`<div class="step">${i}</div>`);
-        }
+        for (let i = 1; i <= state.steps; i += 1) headerCells.push(`<div class="step">${i}</div>`);
         els.gridHeader.innerHTML = headerCells.join('');
 
-        const rows = tracks
-          .map((track) => {
-            const label = `<div class="track-label" data-track-label="${track.id}"><span data-drop="true">${track.name}</span><span class="instrument-dot" style="background:${track.color}"></span></div>`;
-            const cells = Array.from({ length: state.steps }, (_, step) => {
-              const barStart = step % 4 === 0 ? 'bar-start' : '';
-              return `<div class="cell ${barStart}" data-track="${track.id}" data-step="${step}"></div>`;
-            }).join('');
-            return `<div class="grid-row">${label}${cells}</div>`;
-          })
-          .join('');
+        const rows = tracks.map((track) => {
+          const label = `<div class="track-label"><span>${track.name}</span><span class="instrument-dot" style="background:${track.color}"></span></div>`;
+          const cells = Array.from({ length: state.steps }, (_, step) => {
+            const barStart = step % 4 === 0 ? 'bar-start' : '';
+            return `<div class="cell ${barStart}" data-track="${track.id}" data-step="${step}"></div>`;
+          }).join('');
+          return `<div class="grid-row">${label}${cells}</div>`;
+        }).join('');
 
         els.gridBody.innerHTML = rows;
         bindDropTargets();
       }
 
-      function buildNoteInputs() {
-        els.noteTrack.innerHTML = tracks.map((t) => `<option value="${t.id}">${t.name}</option>`).join('');
-        els.notePitch.innerHTML = noteOptions.map(([name, midi]) => `<option value="${midi}">${name}</option>`).join('');
-      }
-
       function buildPalette() {
-        const columns = Object.entries(soundLibrary)
-          .map(([category, sounds]) => {
-            const chips = sounds
-              .map(
-                (sound, index) =>
-                  `<div class="sound-chip" draggable="true" data-sound='${JSON.stringify({ ...sound, category, id: `${category}-${index}` })}'>${sound.name}</div>`
-              )
-              .join('');
-            return `<div class="palette-col"><strong>${category}</strong>${chips}</div>`;
-          })
-          .join('');
+        const categoriesTrans = { drums: 'Ударные', cymbals: 'Тарелки', guitar: 'Гитара', synth: 'Синт', brass: 'Духовые', bass: 'Басс' };
+        
+        const columns = Object.entries(soundLibrary).map(([category, sounds]) => {
+          const chips = sounds.map((sound, index) => 
+            `<div class="sound-chip" style="background:${sound.color}" draggable="true" data-sound='${JSON.stringify({ ...sound, category })}'>${sound.name}</div>`
+          ).join('');
+          return `<div class="palette-col"><strong>${categoriesTrans[category]}</strong>${chips}</div>`;
+        }).join('');
 
         els.palette.innerHTML = columns;
         els.palette.querySelectorAll('.sound-chip').forEach((chip) => {
@@ -585,123 +356,111 @@
 
       function bindDropTargets() {
         document.querySelectorAll('.cell').forEach((cell) => {
-          cell.addEventListener('dragover', (event) => {
-            event.preventDefault();
-            cell.classList.add('drag-over');
-          });
-          cell.addEventListener('dragleave', () => cell.classList.remove('drag-over'));
+          cell.addEventListener('dragover', (e) => { e.preventDefault(); cell.style.background = '#e2e8f0'; });
+          cell.addEventListener('dragleave', () => cell.style.background = '');
           cell.addEventListener('drop', (event) => {
             event.preventDefault();
-            cell.classList.remove('drag-over');
+            cell.style.background = '';
             const raw = event.dataTransfer.getData('text/plain');
             if (!raw) return;
             try {
               const sound = JSON.parse(raw);
               const trackId = cell.dataset.track;
               const step = Number(cell.dataset.step);
+              
+              // Записываем звук в сетку
               state.sequence[trackId][step] = true;
-              state.pitchMap[trackId][step] = sound.freq;
-              state.gateMap[trackId][step] = 1;
-              state.soundMap[trackId][step] = {
-                name: sound.name,
-                type: sound.type,
-                freq: sound.freq,
-                color: sound.color,
-              };
+              state.soundMap[trackId][step] = sound;
+              
+              // Пытаемся предзагрузить аудиофайл, если его положили на сетку
+              preloadAudioFile(sound.file);
+
               renderGrid();
-              updateStatus(`инструмент ${sound.name} добавлен на ${trackId}, шаг ${step + 1}`);
-            } catch {
-              updateStatus('ошибка drag&drop инструмента');
-            }
+              updateStatus(`Добавлен: ${sound.name} на шаг ${step + 1}`);
+            } catch { updateStatus('Ошибка добавления инструмента'); }
           });
         });
       }
 
-      function updateStatus(text) {
-        els.status.textContent = `Статус: ${text}`;
-      }
-
-      function updateTempoDisplay() {
-        els.tempoValue.value = state.tempo;
-      }
-
-      function updateFxDisplay() {
-        els.reverbValue.value = state.fx.reverb;
-        els.echoValue.value = state.fx.echo;
-        els.chorusValue.value = state.fx.chorus;
-      }
+      function updateStatus(text) { els.status.textContent = `Статус: ${text}`; }
+      function updateTempoDisplay() { els.tempoValue.value = state.tempo; }
+      function updateFxDisplay() { els.reverbValue.value = state.fx.reverb; els.echoValue.value = state.fx.echo; }
 
       function renderGrid() {
         tracks.forEach((track) => {
           state.sequence[track.id].forEach((value, step) => {
             const cell = document.querySelector(`.cell[data-track="${track.id}"][data-step="${step}"]`);
             if (!cell) return;
+            
             cell.classList.toggle('active', value);
             cell.classList.toggle('playhead', step === state.currentStep && state.isPlaying);
-            const override = state.soundMap[track.id][step];
-            cell.style.outline = override ? `1px solid ${override.color}` : '';
+            
+            // Отрисовка цветного блока внутри ячейки, если там есть звук
+            const sound = state.soundMap[track.id][step];
+            if (sound && value) {
+              cell.innerHTML = `<div class="cell-content" style="background:${sound.color}">${sound.name}</div>`;
+            } else {
+              cell.innerHTML = ''; // Пустая ячейка
+            }
           });
         });
-        els.barInfo.textContent = state.isPlaying
-          ? `Текущий шаг: ${state.currentStep + 1} / ${state.steps}`
-          : 'Текущий шаг: —';
+        els.barInfo.textContent = state.isPlaying ? `Шаг: ${state.currentStep + 1} / ${state.steps}` : 'Шаг: —';
       }
 
-      function playNote(track, options = {}) {
+      // Умный движок воспроизведения (Файл или Синтезатор)
+      function playNote(soundData) {
+        if (!soundData) return;
         const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        const frequency = options.frequency ?? track.freq;
-        const gate = clamp(options.gate ?? 1, 0.4, 4);
-        const decay = Math.max(NOTE_DECAY, (stepDurationMs() / 1000) * gate * 0.88);
+        
+        const buffer = audioCache[soundData.file];
+        const gainNode = audioCtx.createGain();
         const dry = clamp(1 - state.fx.reverb / 100, 0.35, 1);
-        const vol = (options.volume ?? NOTE_VOLUME) * dry;
-        const attack = NOTE_ATTACK + state.fx.chorus / 2000;
-        const waveType = options.waveType ?? track.type;
-
-        osc.type = waveType;
-        osc.frequency.value = frequency;
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.exponentialRampToValueAtTime(vol, now + attack);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + decay);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + decay + 0.02);
-
+        
+        // Настройка эффекта эхо
+        let finalNode = gainNode;
         if (state.fx.echo > 0) {
           const echoDelay = audioCtx.createDelay();
           const echoGain = audioCtx.createGain();
-          echoDelay.delayTime.value = 0.08 + state.fx.echo / 500;
-          echoGain.gain.value = state.fx.echo / 180;
-          gain.connect(echoDelay);
+          echoDelay.delayTime.value = 0.25; // Задержка эха
+          echoGain.gain.value = state.fx.echo / 120;
+          gainNode.connect(echoDelay);
           echoDelay.connect(echoGain);
           echoGain.connect(audioCtx.destination);
-          setTimeout(() => {
-            echoDelay.disconnect();
-            echoGain.disconnect();
-          }, 500);
+        }
+
+        if (buffer && buffer !== 'fallback') {
+            // ИГРАЕМ РЕАЛЬНЫЙ WAV ФАЙЛ
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            gainNode.gain.value = NOTE_VOLUME * dry * 1.5;
+            
+            source.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            source.start(now);
+        } else {
+            // ИГРАЕМ СИНТЕЗАТОР (Фоллбэк, если файла нет)
+            const osc = audioCtx.createOscillator();
+            osc.type = soundData.type || 'sine';
+            osc.frequency.value = soundData.freq || 440;
+            
+            gainNode.gain.setValueAtTime(0.001, now);
+            gainNode.gain.exponentialRampToValueAtTime((NOTE_VOLUME * dry), now + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3); // Длина затухания
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
         }
       }
 
-      function stepDurationMs() {
-        return (60_000 / state.tempo) / 4;
-      }
+      function stepDurationMs() { return (60_000 / state.tempo) / 4; }
 
       function tick() {
         tracks.forEach((track) => {
           if (state.sequence[track.id][state.currentStep]) {
-            const soundOverride = state.soundMap[track.id][state.currentStep];
-            const pitch = state.pitchMap[track.id][state.currentStep] ?? track.freq;
-            const gate = state.gateMap[track.id][state.currentStep] ?? 1;
-            playNote(track, {
-              frequency: pitch,
-              gate,
-              volume: track.id === 'synth' ? 0.24 : NOTE_VOLUME,
-              waveType: soundOverride?.type,
-            });
+            const soundData = state.soundMap[track.id][state.currentStep];
+            playNote(soundData);
           }
         });
 
@@ -711,17 +470,16 @@
           stopPlayback();
           return;
         }
-
         state.currentStep = (state.currentStep + 1) % state.steps;
       }
 
       function startPlayback() {
         if (state.isPlaying) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         state.isPlaying = true;
-        audioCtx.resume();
         tick();
         state.timerId = setInterval(tick, stepDurationMs());
-        updateStatus(state.isRecording ? 'запись и воспроизведение' : 'воспроизведение');
+        updateStatus('Воспроизведение...');
         els.playBtn.dataset.state = 'active';
       }
 
@@ -729,386 +487,49 @@
         state.isPlaying = false;
         state.currentStep = 0;
         clearInterval(state.timerId);
-        state.timerId = null;
         els.playBtn.dataset.state = '';
         renderGrid();
-        updateStatus(state.isRecording ? 'запись остановлена' : 'остановлено');
+        updateStatus('Остановлено');
       }
 
-      function toggleRecording() {
-        state.isRecording = !state.isRecording;
-        els.recBtn.dataset.state = state.isRecording ? 'active' : '';
-        updateStatus(state.isRecording ? 'режим записи включен' : 'режим записи выключен');
-      }
-
-      function toggleCell(trackId, step) {
-        state.sequence[trackId][step] = !state.sequence[trackId][step];
-        if (state.sequence[trackId][step]) {
-          const track = tracks.find((t) => t.id === trackId);
-          state.pitchMap[trackId][step] = state.pitchMap[trackId][step] ?? track.freq;
-          state.gateMap[trackId][step] = state.gateMap[trackId][step] ?? 1;
-          state.soundMap[trackId][step] = state.soundMap[trackId][step] ?? null;
-        } else {
-          state.pitchMap[trackId][step] = null;
-          state.gateMap[trackId][step] = 1;
-          state.soundMap[trackId][step] = null;
-        }
-        renderGrid();
-      }
-
-      function addNoteFromForm() {
-        const trackId = els.noteTrack.value;
-        const step = clamp(Number(els.noteStep.value) - 1 || 0, 0, state.steps - 1);
-        const midi = Number(els.notePitch.value);
-        const gate = Number(els.noteLen.value);
-        state.sequence[trackId][step] = true;
-        state.pitchMap[trackId][step] = midiToFreq(midi);
-        state.gateMap[trackId][step] = gate;
-        state.soundMap[trackId][step] = null;
-        renderGrid();
-        updateStatus(`нота добавлена: ${trackId}, шаг ${step + 1}`);
-      }
-
-      function clearPattern() {
-        tracks.forEach((track) => {
-          state.sequence[track.id] = Array(state.steps).fill(false);
-          state.pitchMap[track.id] = Array(state.steps).fill(null);
-          state.gateMap[track.id] = Array(state.steps).fill(1);
-          state.soundMap[track.id] = Array(state.steps).fill(null);
-        });
-      }
-
-      function applyPreset(presetKey) {
-        const preset = presets[presetKey];
-        if (!preset) return;
-
-        resetSequence(64);
-        els.stepsCount.value = '64';
-        state.tempo = preset.tempo;
-        els.tempo.value = String(state.tempo);
-        updateTempoDisplay();
-
-        clearPattern();
-
-        Object.entries(preset.rhythm).forEach(([trackId, steps]) => {
-          steps.forEach((step) => {
-            if (step < 0 || step >= state.steps) return;
-            state.sequence[trackId][step] = true;
-            const track = tracks.find((t) => t.id === trackId);
-            state.pitchMap[trackId][step] = track.freq;
-          });
-        });
-
-        preset.notes.forEach((note) => {
-          if (note.step < 0 || note.step >= state.steps) return;
-          state.sequence[note.trackId][note.step] = true;
-          state.pitchMap[note.trackId][note.step] = midiToFreq(note.midi);
-          state.gateMap[note.trackId][note.step] = note.len;
-          state.soundMap[note.trackId][note.step] = null;
-        });
-
-        renderGrid();
-        updateStatus(`загружен пресет: ${preset.name}`);
-      }
-
-      function saveTrack() {
-        const payload = {
-          name: els.trackName.value.trim() || 'Без названия',
-          tempo: state.tempo,
-          steps: state.steps,
-          loopEnabled: state.loopEnabled,
-          fx: state.fx,
-          sequence: state.sequence,
-          pitchMap: state.pitchMap,
-          gateMap: state.gateMap,
-          soundMap: state.soundMap,
-          tracks,
-          updatedAt: new Date().toISOString(),
-        };
-        localStorage.setItem('arm-kassira-track', JSON.stringify(payload));
-        updateStatus(`проект сохранен: ${payload.name}`);
-      }
-
-      function loadTrack() {
-        const raw = localStorage.getItem('arm-kassira-track');
-        if (!raw) {
-          updateStatus('не найден сохраненный проект');
-          return;
-        }
-
-        try {
-          const payload = JSON.parse(raw);
-          const incomingSteps = Math.min(128, Math.max(16, Number(payload.steps) || 32));
-          resetSequence(incomingSteps);
-          els.stepsCount.value = String(incomingSteps);
-
-          if (payload.tracks) {
-            payload.tracks.forEach((savedTrack) => {
-              const track = tracks.find((t) => t.id === savedTrack.id);
-              if (!track) return;
-              Object.assign(track, {
-                name: savedTrack.name,
-                type: savedTrack.type,
-                freq: savedTrack.freq,
-                color: savedTrack.color,
-              });
-            });
-          }
-
-          if (payload.sequence) {
-            tracks.forEach((track) => {
-              const incoming = payload.sequence[track.id] || [];
-              state.sequence[track.id] = Array.from({ length: state.steps }, (_, i) => Boolean(incoming[i]));
-            });
-          }
-
-          if (payload.pitchMap) {
-            tracks.forEach((track) => {
-              const incoming = payload.pitchMap[track.id] || [];
-              state.pitchMap[track.id] = Array.from({ length: state.steps }, (_, i) => Number(incoming[i]) || null);
-            });
-          }
-
-          if (payload.gateMap) {
-            tracks.forEach((track) => {
-              const incoming = payload.gateMap[track.id] || [];
-              state.gateMap[track.id] = Array.from({ length: state.steps }, (_, i) => Number(incoming[i]) || 1);
-            });
-          }
-
-          if (payload.soundMap) {
-            tracks.forEach((track) => {
-              const incoming = payload.soundMap[track.id] || [];
-              state.soundMap[track.id] = Array.from({ length: state.steps }, (_, i) => incoming[i] || null);
-            });
-          }
-
-          if (payload.fx) {
-            state.fx.reverb = clamp(Number(payload.fx.reverb) || 0, 0, 80);
-            state.fx.echo = clamp(Number(payload.fx.echo) || 0, 0, 70);
-            state.fx.chorus = clamp(Number(payload.fx.chorus) || 0, 0, 40);
-            els.reverb.value = state.fx.reverb;
-            els.echo.value = state.fx.echo;
-            els.chorus.value = state.fx.chorus;
-          }
-
-          if (typeof payload.loopEnabled === 'boolean') {
-            state.loopEnabled = payload.loopEnabled;
-            els.loopEnabled.checked = state.loopEnabled;
-          }
-
-          if (payload.tempo) {
-            state.tempo = Math.min(160, Math.max(80, Number(payload.tempo) || 110));
-            els.tempo.value = state.tempo;
-          }
-
-          if (payload.name) {
-            els.trackName.value = payload.name;
-          }
-
-          updateTempoDisplay();
-          updateFxDisplay();
-          buildGrid();
-          buildNoteInputs();
-          renderGrid();
-          updateStatus(`проект загружен: ${payload.name || 'трек'}`);
-        } catch {
-          updateStatus('ошибка чтения сохранения');
-        }
-      }
-
-      function audioBufferToWavBlob(audioBuffer) {
-        const numChannels = audioBuffer.numberOfChannels;
-        const sampleRate = audioBuffer.sampleRate;
-        const bitDepth = 16;
-        const blockAlign = (numChannels * bitDepth) / 8;
-        const byteRate = sampleRate * blockAlign;
-        const dataSize = audioBuffer.length * blockAlign;
-        const buffer = new ArrayBuffer(44 + dataSize);
-        const view = new DataView(buffer);
-
-        function writeString(offset, str) {
-          for (let i = 0; i < str.length; i += 1) {
-            view.setUint8(offset + i, str.charCodeAt(i));
-          }
-        }
-
-        writeString(0, 'RIFF');
-        view.setUint32(4, 36 + dataSize, true);
-        writeString(8, 'WAVE');
-        writeString(12, 'fmt ');
-        view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true);
-        view.setUint16(22, numChannels, true);
-        view.setUint32(24, sampleRate, true);
-        view.setUint32(28, byteRate, true);
-        view.setUint16(32, blockAlign, true);
-        view.setUint16(34, bitDepth, true);
-        writeString(36, 'data');
-        view.setUint32(40, dataSize, true);
-
-        const channels = Array.from({ length: numChannels }, (_, ch) => audioBuffer.getChannelData(ch));
-        let offset = 44;
-
-        for (let i = 0; i < audioBuffer.length; i += 1) {
-          for (let ch = 0; ch < numChannels; ch += 1) {
-            const sample = Math.max(-1, Math.min(1, channels[ch][i]));
-            view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
-            offset += 2;
-          }
-        }
-
-        return new Blob([buffer], { type: 'audio/wav' });
-      }
-
-      async function exportTrackWav() {
-        updateStatus('идет рендер WAV (3 мин), подождите...');
-
-        const stepDuration = stepDurationMs() / 1000;
-        const loopDuration = state.steps * stepDuration;
-        const totalDuration = WAV_EXPORT_DURATION_SECONDS;
-        const loopsToRender = Math.ceil(totalDuration / loopDuration);
-        const tail = 0.5;
-        const frameCount = Math.ceil((totalDuration + tail) * WAV_SAMPLE_RATE);
-        const offlineCtx = new OfflineAudioContext(2, frameCount, WAV_SAMPLE_RATE);
-
-        for (let loopIndex = 0; loopIndex < loopsToRender; loopIndex += 1) {
-          const loopOffset = loopIndex * loopDuration;
-          tracks.forEach((track) => {
-            state.sequence[track.id].forEach((isActive, step) => {
-              if (!isActive) return;
-              const start = loopOffset + step * stepDuration;
-              if (start > totalDuration) return;
-
-              const osc = offlineCtx.createOscillator();
-              const gain = offlineCtx.createGain();
-              const gate = clamp(state.gateMap[track.id][step] ?? 1, 0.4, 4);
-              const decay = Math.max(NOTE_DECAY, stepDuration * gate * 0.88);
-              const vol = track.id === 'synth' ? 0.24 : NOTE_VOLUME;
-              const soundOverride = state.soundMap[track.id][step];
-              osc.type = soundOverride?.type || track.type;
-              osc.frequency.value = state.pitchMap[track.id][step] ?? track.freq;
-              gain.gain.setValueAtTime(0.001, start);
-              gain.gain.exponentialRampToValueAtTime(vol, start + NOTE_ATTACK);
-              gain.gain.exponentialRampToValueAtTime(0.001, start + decay);
-              osc.connect(gain);
-              gain.connect(offlineCtx.destination);
-              osc.start(start);
-              osc.stop(start + decay + 0.02);
-            });
-          });
-        }
-
-        const rendered = await offlineCtx.startRendering();
-        const blob = audioBufferToWavBlob(rendered);
-        const fileNameBase = (els.trackName.value.trim() || 'track').replace(/\s+/g, '_').toLowerCase();
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.download = `${fileNameBase}.wav`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        updateStatus(`аудио сохранено: ${link.download} (3 мин)`);
-      }
-
-      function exportTrackJson() {
-        const payload = {
-          name: els.trackName.value.trim() || 'Без названия',
-          tempo: state.tempo,
-          steps: state.steps,
-          loopEnabled: state.loopEnabled,
-          fx: state.fx,
-          tracks,
-          sequence: state.sequence,
-          pitchMap: state.pitchMap,
-          gateMap: state.gateMap,
-          soundMap: state.soundMap,
-          exportedAt: new Date().toISOString(),
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${payload.name.replace(/\s+/g, '_').toLowerCase() || 'track'}.json`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        updateStatus(`экспортировано: ${link.download}`);
-      }
-
+      // Удаление кубика по клику
       els.gridBody.addEventListener('click', (event) => {
         const cell = event.target.closest('.cell');
         if (!cell) return;
-        toggleCell(cell.dataset.track, Number(cell.dataset.step));
-      });
-
-      els.tempo.addEventListener('input', () => {
-        state.tempo = Number(els.tempo.value);
-        updateTempoDisplay();
-        if (state.isPlaying) {
-          clearInterval(state.timerId);
-          state.timerId = setInterval(tick, stepDurationMs());
+        const trackId = cell.dataset.track;
+        const step = Number(cell.dataset.step);
+        
+        // Если там был звук, удаляем его
+        if (state.sequence[trackId][step]) {
+            state.sequence[trackId][step] = false;
+            state.soundMap[trackId][step] = null;
+            renderGrid();
         }
       });
 
-      els.stepsCount.addEventListener('change', () => {
-        const nextSteps = Number(els.stepsCount.value);
-        resetSequence(nextSteps);
-        buildGrid();
-        renderGrid();
-        updateStatus(`количество шагов: ${nextSteps}`);
-      });
-
-      els.loopEnabled.addEventListener('change', () => {
-        state.loopEnabled = els.loopEnabled.checked;
-      });
-
-      els.reverb.addEventListener('input', () => {
-        state.fx.reverb = Number(els.reverb.value);
-        updateFxDisplay();
-      });
-      els.echo.addEventListener('input', () => {
-        state.fx.echo = Number(els.echo.value);
-        updateFxDisplay();
-      });
-      els.chorus.addEventListener('input', () => {
-        state.fx.chorus = Number(els.chorus.value);
-        updateFxDisplay();
-      });
-
-      els.addNoteBtn.addEventListener('click', addNoteFromForm);
-      els.presetYolochka.addEventListener('click', () => applyPreset('yolochka'));
-      els.presetKatyusha.addEventListener('click', () => applyPreset('katyusha'));
+      els.tempo.addEventListener('input', () => { state.tempo = Number(els.tempo.value); updateTempoDisplay(); if (state.isPlaying) { clearInterval(state.timerId); state.timerId = setInterval(tick, stepDurationMs()); }});
+      els.stepsCount.addEventListener('change', () => { resetSequence(Number(els.stepsCount.value)); buildGrid(); renderGrid(); });
+      els.loopEnabled.addEventListener('change', () => { state.loopEnabled = els.loopEnabled.checked; });
+      els.reverb.addEventListener('input', () => { state.fx.reverb = Number(els.reverb.value); updateFxDisplay(); });
+      els.echo.addEventListener('input', () => { state.fx.echo = Number(els.echo.value); updateFxDisplay(); });
 
       els.playBtn.addEventListener('click', startPlayback);
       els.stopBtn.addEventListener('click', stopPlayback);
-      els.recBtn.addEventListener('click', toggleRecording);
-      els.saveAudio.addEventListener('click', () => exportTrackWav().catch(() => updateStatus('ошибка экспорта WAV')));
-      els.saveProject.addEventListener('click', saveTrack);
-      els.loadLocal.addEventListener('click', loadTrack);
-      els.exportJson.addEventListener('click', exportTrackJson);
-
-      document.addEventListener('keydown', (event) => {
-        if (!state.isRecording) return;
-        const index = Number(event.key) - 1;
-        if (Number.isNaN(index) || index < 0 || index >= tracks.length) return;
-        const track = tracks[index];
-        state.sequence[track.id][state.currentStep] = true;
-        state.pitchMap[track.id][state.currentStep] = track.freq;
-        state.gateMap[track.id][state.currentStep] = 1;
-        state.soundMap[track.id][state.currentStep] = null;
-        playNote(track);
-        renderGrid();
+      
+      // Простое сохранение в кэш браузера
+      els.saveProject.addEventListener('click', () => {
+        localStorage.setItem('poputchik-track', JSON.stringify({ seq: state.sequence, map: state.soundMap, tempo: state.tempo }));
+        updateStatus('Проект сохранен!');
+      });
+      els.loadLocal.addEventListener('click', () => {
+        const saved = JSON.parse(localStorage.getItem('poputchik-track'));
+        if (saved) { state.sequence = saved.seq; state.soundMap = saved.map; state.tempo = saved.tempo; els.tempo.value = state.tempo; updateTempoDisplay(); renderGrid(); updateStatus('Проект загружен!'); }
       });
 
       resetSequence(32);
       updateTempoDisplay();
       updateFxDisplay();
       buildGrid();
-      buildNoteInputs();
       buildPalette();
       renderGrid();
     </script>
