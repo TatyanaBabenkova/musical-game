@@ -8,7 +8,7 @@
       :root {
         color-scheme: light;
         --bg: #f4f7f6; 
-        /* Делаем панели СИЛЬНО прозрачными для эффекта стекла */
+        /* Полупрозрачные панели для эффекта стекла */
         --panel: rgba(255, 255, 255, 0.45); 
         --panel-soft: rgba(255, 255, 255, 0.35);
         --line: rgba(203, 213, 225, 0.6); 
@@ -17,26 +17,24 @@
       }
       * { box-sizing: border-box; }
       
-      /* Убрали z-index у body, чтобы слои работали правильно */
       body { margin: 0; background-color: var(--bg); color: var(--text); font-family: Inter, Segoe UI, sans-serif; }
       
-      /* --- ФОНОВЫЙ СЛОЙ --- */
+      /* --- ФОНОВЫЙ СЛОЙ (ПУТЬ ИСПРАВЛЕН НА ИДЕАЛЬНЫЙ) --- */
       .app-background {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('./IMG/bg.png'); /* ПУТЬ К ВАШЕМУ ФАЙЛУ В ПАПКЕ img */
+        background-image: url('./IMG/bg.png'); /* ПАПКА БОЛЬШИМИ, ФАЙЛ МАЛЕНЬКИМИ! */
         background-size: cover; 
         background-position: center;
         background-repeat: no-repeat;
-        opacity: 0.35; /* Видимость картинки 35% */
-        z-index: 0; /* Кладем слой НАД фоном страницы, но ПОД интерфейсом */
-        pointer-events: none; /* Чтобы не перекрывала клики по кнопкам */
+        opacity: 0.4; /* Видимость 40% */
+        z-index: 0; /* Находится под панелями игры */
+        pointer-events: none; 
       }
       /* ----------------------- */
 
       .app { max-width: 1500px; margin: 10px auto; padding: 10px; position: relative; z-index: 1;}
       
-      /* Панель с матовым стеклом */
       .panel { background: var(--panel); border: 1px solid rgba(255,255,255,0.8); border-radius: 16px; padding: 12px 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
       
       .toolbar, .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -56,7 +54,6 @@
       .tempo, .fx-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;}
       .tempo output, .fx-item output { min-width: 25px; color: var(--accent); font-weight: bold;}
       
-      /* Сетка полупрозрачная */
       .grid-wrap { border: 1px solid rgba(255,255,255,0.5); border-radius: 10px; overflow: auto; max-height: 45vh; background: var(--panel-soft); backdrop-filter: blur(8px); box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);}
       .grid-header, .grid-row { display: grid; grid-template-columns: 160px repeat(var(--steps), minmax(24px, 1fr)); min-width: max-content; }
       .grid-header { position: sticky; top: 0; z-index: 2; background: rgba(226, 232, 240, 0.6); backdrop-filter: blur(10px); }
@@ -80,7 +77,6 @@
       #status.error { color: var(--danger); font-weight: bold; }
       .hint { margin-top: 4px; font-size: 12px; color: #2563eb; background: rgba(239, 246, 255, 0.6); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px;}
       
-      /* Инвентарь полупрозрачный */
       .palette { margin-top: 10px; border-top: 2px dashed var(--line); padding-top: 10px; }
       .palette h3 { margin: 0 0 8px; font-size: 14px; color: var(--text); }
       .palette-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
@@ -210,7 +206,7 @@
         { id: 'bass', name: 'Басс', color: '#ef4444' },
       ];
 
-      // --- ОБНОВЛЕННЫЕ ГОТОВЫЕ ШАБЛОНЫ МЕЛОДИЙ ---
+      // --- ГОТОВЫЕ ШАБЛОНЫ МЕЛОДИЙ ---
       const appPresets = {
         beat: {
           name: "Прямой бит", tempo: 115, steps: 16,
@@ -221,21 +217,16 @@
             {t: 'bass', s: 0, i: 0}, {t: 'bass', s: 8, i: 0}
           ]
         },
-        dance: { // НОВЫЙ ТАНЦЕВАЛЬНЫЙ ШАБЛОН ВМЕСТО СИНТ-ВЕЙВА
+        dance: {
           name: "Танцевальный", tempo: 122, steps: 32,
           data: [
-            // Прямая ритмичная бочка (каждый удар)
             {t: 'drums', s: 0, i: 0}, {t: 'drums', s: 4, i: 0}, {t: 'drums', s: 8, i: 0}, {t: 'drums', s: 12, i: 0},
             {t: 'drums', s: 16, i: 0}, {t: 'drums', s: 20, i: 0}, {t: 'drums', s: 24, i: 0}, {t: 'drums', s: 28, i: 0},
-            // Хлопки на 2 и 4 долю
             {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
-            // Открытый хэт между ударами бочки
             {t: 'cymbals', s: 2, i: 0}, {t: 'cymbals', s: 6, i: 0}, {t: 'cymbals', s: 10, i: 0}, {t: 'cymbals', s: 14, i: 0},
             {t: 'cymbals', s: 18, i: 0}, {t: 'cymbals', s: 22, i: 0}, {t: 'cymbals', s: 26, i: 0}, {t: 'cymbals', s: 30, i: 0},
-            // Динамичный синтезаторный бас (играет в слабую долю)
             {t: 'bass', s: 2, i: 2}, {t: 'bass', s: 6, i: 2}, {t: 'bass', s: 10, i: 2}, {t: 'bass', s: 14, i: 2},
             {t: 'bass', s: 18, i: 2}, {t: 'bass', s: 22, i: 2}, {t: 'bass', s: 26, i: 2}, {t: 'bass', s: 30, i: 2},
-            // Аккорды пэда на начало каждого такта
             {t: 'synth', s: 0, i: 1}, {t: 'synth', s: 16, i: 1}
           ]
         },
@@ -246,7 +237,6 @@
             {t: 'cymbals', s: 4, i: 1}, {t: 'cymbals', s: 12, i: 1}, {t: 'cymbals', s: 20, i: 1}, {t: 'cymbals', s: 28, i: 1},
             {t: 'cymbals', s: 0, i: 2}, {t: 'cymbals', s: 8, i: 2}, {t: 'cymbals', s: 16, i: 2}, {t: 'cymbals', s: 24, i: 2}, 
             {t: 'guitar', s: 4, i: 2}, {t: 'guitar', s: 12, i: 2}, {t: 'guitar', s: 20, i: 2}, {t: 'guitar', s: 28, i: 2},
-            // Двойные трубы, как просили
             {t: 'brass', s: 14, i: 1}, {t: 'brass', s: 15, i: 1}, {t: 'brass', s: 30, i: 1}, {t: 'brass', s: 31, i: 1},
             {t: 'bass', s: 0, i: 1}, {t: 'bass', s: 3, i: 1}, {t: 'bass', s: 8, i: 1}, {t: 'bass', s: 16, i: 1}, {t: 'bass', s: 19, i: 1}, {t: 'bass', s: 24, i: 1}
           ]
@@ -350,7 +340,6 @@
         });
       }
 
-      // --- ЛОГИКА ШАБЛОНОВ ---
       window.clearGrid = function() {
         tracks.forEach(t => { state.sequence[t.id] = Array(state.steps).fill(false); state.soundMap[t.id] = Array(state.steps).fill(null); });
         renderGrid(); els.status.textContent = 'Сетка очищена';
@@ -545,6 +534,16 @@
 
       resetSequence(32); els.tempoValue.value = state.tempo; els.reverbValue.value = state.fx.reverb; els.echoValue.value = state.fx.echo;
       buildGrid(); buildPalette(); renderGrid();
+
+      // --- НЕВИДИМАЯ ПРОВЕРКА ФАЙЛА ФОНА ---
+      window.onload = () => {
+        const bgChecker = new Image();
+        bgChecker.onerror = function() {
+          alert("❌ ОШИБКА!\nСервер на GitHub НЕ ВИДИТ картинку.\n\nПожалуйста, убедитесь, что:\n1. Папка называется строго большими буквами: IMG\n2. Файл называется строго маленькими буквами: bg.png");
+        };
+        bgChecker.src = './IMG/bg.png';
+      };
+      // -------------------------------------
     </script>
   </body>
 </html>
