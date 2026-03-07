@@ -19,12 +19,11 @@
         content: '';
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('./img/bg.png'); /* ИЗМЕНЕНО НА .png */
+        background-image: url('./img/bg.png'); /* Вернули ваш .jpg */
         background-size: cover; 
         background-position: center;
-        /* НАСТРОЙКА ПРОЗРАЧНОСТИ: 0.2 это 20% видимости. 
-           Если слишком ярко, сделайте 0.1 или 0.05. Если слишком бледно - 0.4 или 0.5 */
-        opacity: 0.2; 
+        opacity: 0.8; /* Картинка уже бледная, делаем её видимой на 80% */
+        mix-blend-mode: multiply; /* Убирает белый фон картинки, оставляя только ноты */
         z-index: -1; 
         pointer-events: none;
       }
