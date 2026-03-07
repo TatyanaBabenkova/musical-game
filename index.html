@@ -22,7 +22,7 @@
       .app-background {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('bg.png'); /* ФАЙЛ ДОЛЖЕН БЫТЬ bg.png маленькими буквами! */
+        background-image: url('./IMG/bg.png'); /* ФАЙЛ ДОЛЖЕН БЫТЬ bg.png маленькими буквами! */
         background-size: cover; 
         background-position: center;
         background-repeat: no-repeat;
@@ -173,7 +173,7 @@
         // Делаем временную красную заливку фона, чтобы было видно, что слой вообще работает
         document.querySelector('.app-background').style.backgroundColor = 'rgba(255, 0, 0, 0.2)'; 
       };
-      bgChecker.src = 'bg.png';
+      bgChecker.src = './IMG/bg.png';
       // -------------------------------
       
       const NOTE_VOLUME = 0.3;
