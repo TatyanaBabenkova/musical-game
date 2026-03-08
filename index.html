@@ -63,7 +63,7 @@
         transition: color 0.4s ease;
       }
       
-      #overlay p { max-width: 450px; line-height: 1.5; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 5px var(--overlay-shadow); font-weight: 600;}
+      #overlay p { max-width: 500px; line-height: 1.5; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 5px var(--overlay-shadow); font-weight: 600;}
       
       .theme-toggle-btn { margin-bottom: 25px; padding: 12px 24px; border-radius: 30px; border: 2px solid var(--overlay-text); background: transparent; color: var(--overlay-text); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px;}
       .theme-toggle-btn:hover { background: var(--overlay-text); color: var(--bg-base); }
@@ -96,7 +96,7 @@
       .danger { color: var(--danger); border-color: var(--danger); }
       .danger:hover { background: rgba(239, 68, 68, 0.1); }
       
-      /* КРАСИВОЕ СВЕЧЕНИЕ ДЛЯ ВЫБРАННОГО ИНСТРУМЕНТА */
+      /* НЕОНОВОЕ СВЕЧЕНИЕ ДЛЯ ВЫБРАННОГО ИНСТРУМЕНТА И БЕГУНКА */
       .selected { outline: 2px solid var(--accent); transform: scale(1.05); z-index: 5; box-shadow: 0 0 12px rgba(59, 130, 246, 0.6); }
 
       /* СЕТКА */
@@ -110,7 +110,7 @@
       .step { display: grid; place-items: center; font-size: 10px; font-weight: 900; background: rgba(255,255,255,0.1); }
       .cell.active { background: rgba(59, 130, 246, 0.7); box-shadow: inset 0 0 10px rgba(255,255,255,0.3); }
       
-      /* КРАСИВЫЙ БЕГУНОК ВО ВРЕМЯ ВОСПРОИЗВЕДЕНИЯ */
+      /* СИНЕЕ НЕОНОВОЕ СВЕЧЕНИЕ БЕГУНКА */
       .cell.playhead { 
         outline: 2px solid var(--accent); 
         z-index: 5; 
@@ -156,12 +156,13 @@
       }
     </style>
   </head>
-  <body class="light-theme">
+  <body class="dark-theme">
 
     <div id="overlay">
       <h1>МУЗЫКАЛЬНЫЙ БРИЗ</h1>
       <p>Создавай свою музыку в одно касание!<br><br>
-      <b>Как играть:</b> Выбери инструмент внизу (он подсветится), а затем нажимай на клетки в таблице, чтобы расставить звуки.</p>
+      <b>Как играть:</b> Выбери инструмент внизу (он подсветится), а затем нажимай на клетки в таблице, чтобы расставить звуки.<br><br>
+      💡 <b>Подсказка:</b> Воспользуйся готовыми шаблонами для вдохновения и переделай их на свой вкус!</p>
       
       <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 СМЕНИТЬ ТЕМУ ФОНА</button>
       <button class="start-btn" onclick="startGame()">НАЧАТЬ ИГРУ</button>
@@ -177,6 +178,15 @@
                 <button onclick="exportWav()">💾 WAV</button>
                 <button class="danger" onclick="clearGrid()">🗑️ ОЧИСТИТЬ</button>
             </div>
+            
+            <div class="ui-group" id="desktopPresets">
+                <label>Шаблоны</label>
+                <button onclick="loadPreset('beat')">БИТ</button>
+                <button onclick="loadPreset('dance')">ТАНЕЦ</button>
+                <button onclick="loadPreset('funk')">ФАНК</button>
+                <button onclick="loadPreset('drive')">ДРАЙВ 🔥</button>
+            </div>
+
             <div class="ui-group">
                 <div class="toolbar-one-line">
                     <select id="stepsCount" onchange="changeSteps()">
@@ -202,12 +212,12 @@
         <div class="palette-desktop" id="paletteDesktop"></div>
         <div id="paletteMobile" class="palette-mobile"></div>
         
-        <div class="presets-zone">
+        <div class="presets-zone" id="mobilePresets" style="display:none;">
             <label>Готовые шаблоны:</label>
             <button onclick="loadPreset('beat')">БИТ</button>
             <button onclick="loadPreset('dance')">ТАНЕЦ</button>
             <button onclick="loadPreset('funk')">ФАНК</button>
-            <button class="primary" onclick="loadPreset('drive')" style="box-shadow: 0 0 10px rgba(59,130,246,0.5)">ДРАЙВ 🔥</button>
+            <button onclick="loadPreset('drive')">ДРАЙВ 🔥</button>
         </div>
 
       </section>
@@ -228,7 +238,7 @@
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const audioCache = {};
 
-      function startGame() { document.getElementById('overlay').style.display='none'; document.getElementById('mainApp').style.display='block'; if (audioCtx.state === 'suspended') audioCtx.resume(); }
+      function startGame() { document.getElementById('overlay').style.display='none'; document.getElementById('mainApp').style.display='block'; if (audioCtx.state === 'suspended') audioCtx.resume(); adjustLayout(); }
       function toggleTheme() { document.body.classList.toggle('dark-theme'); }
 
       function buildPalettes() {
@@ -267,7 +277,14 @@
         const isMob = window.innerWidth <= 900;
         h.innerHTML = '<div class="track-label">ТРЕК</div>' + Array.from({length: state.steps}, (_, i) => `<div class="step">${i+1}</div>`).join('');
         b.innerHTML = tracks.map(t => `<div class="grid-row"><div class="track-label">${isMob ? t.i : t.n}</div>${Array.from({length: state.steps}, (_, i) => `<div class="cell" data-track="${t.id}" data-step="${i}" onclick="toggleCell(this)"></div>`).join('')}</div>`).join('');
-        document.getElementById('paletteMobile').style.display = isMob ? 'block' : 'none';
+        adjustLayout();
+      }
+      
+      function adjustLayout() {
+          const isMob = window.innerWidth <= 900;
+          document.getElementById('paletteMobile').style.display = isMob ? 'block' : 'none';
+          document.getElementById('desktopPresets').style.display = isMob ? 'none' : 'flex';
+          document.getElementById('mobilePresets').style.display = isMob ? 'flex' : 'none';
       }
 
       function toggleCell(el) {
@@ -383,7 +400,7 @@
       }
 
       buildPalettes(); buildGrid();
-      window.onresize = buildGrid;
+      window.onresize = () => { buildGrid(); adjustLayout(); };
     </script>
   </body>
 </html>
