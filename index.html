@@ -279,6 +279,22 @@
         h.innerHTML = '<div class="track-label">ТРЕК</div>' + Array.from({length: state.steps}, (_, i) => `<div class="step">${i+1}</div>`).join('');
         b.innerHTML = tracks.map(t => `<div class="grid-row"><div class="track-label">${isMob ? t.i : t.n}</div>${Array.from({length: state.steps}, (_, i) => `<div class="cell" data-track="${t.id}" data-step="${i}" onclick="toggleCell(this)"></div>`).join('')}</div>`).join('');
         adjustLayout();
+        // --- НАЧАЛО НОВОГО КУСОЧКА (Восстановление квадратиков) ---
+        tracks.forEach(t => {
+          if (state.sequence[t.id]) {
+            for (let s in state.sequence[t.id]) {
+              if (state.sequence[t.id][s]) {
+                const el = document.querySelector(`.cell[data-track="${t.id}"][data-step="${s}"]`);
+                if (el) {
+                  const snd = state.soundMap[t.id][s];
+                  el.classList.add('active'); 
+                  el.innerHTML = `<div style="width:100%;height:100%;background:${snd.color};border-radius:4px"></div>`;
+                }
+              }
+            }
+          }
+        });
+        // --- КОНЕЦ НОВОГО КУСОЧКА ---
       }
       
       function adjustLayout() {
