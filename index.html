@@ -7,11 +7,15 @@
     <style>
       :root {
         --accent: #3b82f6; --accent-2: #10b981; --danger: #ef4444;
+        
+        /* СВЕТЛАЯ ТЕМА */
         --bg-base: #e2e8f0;
         --glass: rgba(255, 255, 255, 0.25);
         --ui-bg: rgba(255, 255, 255, 0.85);
         --text: #1e293b; 
         --border: rgba(0, 0, 0, 0.15);
+        
+        /* Цвета для заставки */
         --title-color: #1e3a8a;
         --overlay-text: #334155;
         --overlay-dim: rgba(255, 255, 255, 0.4); 
@@ -19,11 +23,14 @@
       }
       
       body.dark-theme {
+        /* ТЕМНАЯ ТЕМА */
         --bg-base: #1e293b;
         --glass: rgba(0, 0, 0, 0.4);
         --ui-bg: rgba(30, 41, 59, 0.9);
         --text: #f8fafc; 
         --border: rgba(255, 255, 255, 0.1);
+        
+        /* Цвета для заставки */
         --title-color: #60a5fa;
         --overlay-text: #e2e8f0;
         --overlay-dim: rgba(0, 0, 0, 0.5); 
@@ -48,10 +55,19 @@
         text-align: center; padding: 20px; color: var(--overlay-text);
       }
       #overlay::before { content: ''; position: absolute; inset: 0; background: var(--overlay-dim); z-index: -1; transition: background 0.4s ease; }
-      #overlay h1 { color: var(--title-color); font-size: clamp(1.8rem, 9vw, 4.5rem); margin-bottom: 15px; text-shadow: 0 8px 25px var(--overlay-shadow); font-weight: 900; line-height: 1; letter-spacing: -2px; transition: color 0.4s ease; }
+      
+      #overlay h1 { 
+        color: var(--title-color); 
+        font-size: clamp(1.8rem, 9vw, 4.5rem); margin-bottom: 15px; 
+        text-shadow: 0 8px 25px var(--overlay-shadow); font-weight: 900; line-height: 1; letter-spacing: -2px; 
+        transition: color 0.4s ease;
+      }
+      
       #overlay p { max-width: 450px; line-height: 1.5; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 5px var(--overlay-shadow); font-weight: 600;}
+      
       .theme-toggle-btn { margin-bottom: 25px; padding: 12px 24px; border-radius: 30px; border: 2px solid var(--overlay-text); background: transparent; color: var(--overlay-text); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px;}
       .theme-toggle-btn:hover { background: var(--overlay-text); color: var(--bg-base); }
+      
       .start-btn { padding: 18px 50px; font-size: 1.3rem; background: var(--accent); color: white; border: none; border-radius: 60px; cursor: pointer; font-weight: 900; box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4); }
 
       /* ПРИЛОЖЕНИЕ */
@@ -67,6 +83,7 @@
         background: var(--ui-bg); padding: 10px; border-radius: 16px; 
         border: 1px solid rgba(0,0,0,0.05); display: flex; gap: 8px; align-items: center; transition: 0.3s;
       }
+      .ui-group label { font-size: 9px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px;}
 
       button, select, input { 
         padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); 
@@ -78,7 +95,9 @@
       .primary { background: var(--accent) !important; color: white !important; border: none; }
       .danger { color: var(--danger); border-color: var(--danger); }
       .danger:hover { background: rgba(239, 68, 68, 0.1); }
-      .selected { outline: 3px solid var(--text); transform: scale(1.05); z-index: 5; }
+      
+      /* КРАСИВОЕ СВЕЧЕНИЕ ДЛЯ ВЫБРАННОГО ИНСТРУМЕНТА */
+      .selected { outline: 2px solid var(--accent); transform: scale(1.05); z-index: 5; box-shadow: 0 0 12px rgba(59, 130, 246, 0.6); }
 
       /* СЕТКА */
       .grid-wrap { overflow-x: auto; border-radius: 16px; background: rgba(255,255,255,0.05); margin-bottom: 15px; border: 1px solid var(--border); }
@@ -90,7 +109,14 @@
       .cell, .step { width: 38px; height: 38px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
       .step { display: grid; place-items: center; font-size: 10px; font-weight: 900; background: rgba(255,255,255,0.1); }
       .cell.active { background: rgba(59, 130, 246, 0.7); box-shadow: inset 0 0 10px rgba(255,255,255,0.3); }
-      .cell.playhead { outline: 3px solid var(--text); z-index: 5; background: rgba(255,255,255,0.1); }
+      
+      /* КРАСИВЫЙ БЕГУНОК ВО ВРЕМЯ ВОСПРОИЗВЕДЕНИЯ */
+      .cell.playhead { 
+        outline: 2px solid var(--accent); 
+        z-index: 5; 
+        background: rgba(59, 130, 246, 0.15); 
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); 
+      }
 
       /* ИНВЕНТАРЬ */
       .palette-desktop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 15px; }
@@ -100,36 +126,32 @@
       .sound-chip { width: 100%; margin-bottom: 5px; padding: 10px 2px; border: none; border-radius: 8px; color: white; font-weight: 900; font-size: 10px; }
 
       /* БЛОК ШАБЛОНОВ ВНИЗУ */
-      .presets-zone { background: var(--ui-bg); padding: 12px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap;}
+      .presets-zone { background: var(--ui-bg); padding: 12px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; transition: 0.3s;}
       .presets-zone label { font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin-right: 5px;}
 
-      /* АДАПТИВНОСТЬ УЛЬТРА-КОМПАКТ (ТЕЛЕФОН) */
       @media (max-width: 900px) {
         .app { padding: 4px; }
         .panel { padding: 8px; border-radius: 18px; }
         .palette-desktop { display: none; } .palette-mobile { display: block; }
         
-        /* Убираем лишние отступы */
         .ui-container { gap: 4px; margin-bottom: 6px; flex-direction: column; }
-        
-        /* Управление в две строчки */
         .ui-group { width: 100%; justify-content: space-between; padding: 6px 8px; gap: 4px;}
+        .ui-group label { display: none; }
+        
         button, select, input { padding: 8px 6px; font-size: 11px; }
         
         .toolbar-one-line { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 4px; }
         .toolbar-one-line select { padding: 6px 4px; font-size: 10px; }
         .toolbar-one-line input[type="range"] { width: 70px; margin: 0 4px; }
         
-        /* Сетка тоньше */
         .grid-wrap { margin-bottom: 6px; border-radius: 12px;}
         .cell, .step { width: 30px; height: 30px; }
         .track-label { width: 38px; font-size: 16px; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; }
         
         #status { margin: 4px 0; font-size: 10px; }
         
-        /* Шаблоны внизу */
         .presets-zone { padding: 8px; border-radius: 12px; gap: 4px;}
-        .presets-zone label { display: none; } /* Скрываем слово "Шаблоны" для экономии места */
+        .presets-zone label { display: none; } 
         .presets-zone button { flex: 1; padding: 8px 2px; font-size: 10px;}
       }
     </style>
@@ -245,6 +267,7 @@
         const isMob = window.innerWidth <= 900;
         h.innerHTML = '<div class="track-label">ТРЕК</div>' + Array.from({length: state.steps}, (_, i) => `<div class="step">${i+1}</div>`).join('');
         b.innerHTML = tracks.map(t => `<div class="grid-row"><div class="track-label">${isMob ? t.i : t.n}</div>${Array.from({length: state.steps}, (_, i) => `<div class="cell" data-track="${t.id}" data-step="${i}" onclick="toggleCell(this)"></div>`).join('')}</div>`).join('');
+        document.getElementById('paletteMobile').style.display = isMob ? 'block' : 'none';
       }
 
       function toggleCell(el) {
@@ -286,7 +309,6 @@
           beat: { s: 16, bpm: 110, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'cymbals',s:2,i:0},{t:'cymbals',s:6,i:0},{t:'cymbals',s:10,i:0},{t:'cymbals',s:14,i:0},{t:'cymbals',s:0,i:0},{t:'cymbals',s:4,i:0},{t:'cymbals',s:8,i:0},{t:'cymbals',s:12,i:0}] },
           dance: { s: 32, bpm: 122, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'drums',s:16,i:0},{t:'drums',s:20,i:0},{t:'drums',s:24,i:0},{t:'drums',s:28,i:0},{t:'cymbals',s:4,i:1},{t:'cymbals',s:12,i:1},{t:'cymbals',s:20,i:1},{t:'cymbals',s:28,i:1},{t:'cymbals',s:2,i:0},{t:'cymbals',s:10,i:0},{t:'bass',s:2,i:2},{t:'bass',s:6,i:2},{t:'bass',s:10,i:2},{t:'bass',s:14,i:2},{t:'synth',s:0,i:1}] },
           funk: { s: 32, bpm: 105, d: [{t:'drums',s:0,i:1},{t:'drums',s:10,i:1},{t:'drums',s:16,i:1},{t:'drums',s:26,i:1},{t:'brass',s:14,i:1},{t:'brass',s:15,i:1},{t:'brass',s:30,i:1},{t:'brass',s:31,i:1},{t:'bass',s:0,i:1},{t:'bass',s:3,i:1},{t:'bass',s:8,i:1},{t:'guitar',s:4,i:2},{t:'guitar',s:12,i:2},{t:'guitar',s:20,i:2},{t:'guitar',s:28,i:2}] },
-          // СУПЕР-ШАБЛОН ДРАЙВ (64 шага, 128 BPM)
           drive: { s: 64, bpm: 128, d: [
             {t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'drums',s:16,i:0},{t:'drums',s:20,i:0},{t:'drums',s:24,i:0},{t:'drums',s:28,i:0},{t:'drums',s:32,i:0},{t:'drums',s:36,i:0},{t:'drums',s:40,i:0},{t:'drums',s:44,i:0},{t:'drums',s:48,i:0},{t:'drums',s:52,i:0},{t:'drums',s:56,i:0},{t:'drums',s:60,i:0},
             {t:'drums',s:14,i:1},{t:'drums',s:30,i:1},{t:'drums',s:46,i:1},{t:'drums',s:62,i:1},
@@ -300,8 +322,8 @@
         }[p];
         
         state.steps = data.s; 
-        document.getElementById('stepsCount').value = data.s; // Обновляем селект
-        updateTempo(data.bpm); // Устанавливаем идеальный темп
+        document.getElementById('stepsCount').value = data.s;
+        updateTempo(data.bpm);
         buildGrid();
         
         data.d.forEach(n => {
