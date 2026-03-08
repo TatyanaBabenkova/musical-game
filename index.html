@@ -8,15 +8,24 @@
       :root {
         --accent: #3b82f6; --accent-2: #10b981; --danger: #ef4444;
         --glass: rgba(255, 255, 255, 0.12);
-        --border: rgba(0, 0, 0, 0.15);
+        --ui-bg: rgba(255, 255, 255, 0.85);
+        --text: #1e293b; --border: rgba(0, 0, 0, 0.15);
       }
       
+      /* ТЕМНАЯ ТЕМА */
+      body.dark-theme {
+        --glass: rgba(0, 0, 0, 0.4);
+        --ui-bg: rgba(30, 41, 59, 0.9);
+        --text: #f8fafc; --border: rgba(255, 255, 255, 0.1);
+      }
+
       html, body { 
         margin: 0; padding: 0; min-height: 100vh; background-color: #000;
         background-image: url('./IMG/bg.png');
         background-size: cover; background-position: center;
         background-attachment: fixed; background-repeat: no-repeat;
         font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        transition: background-color 0.3s;
       }
 
       /* ЗАСТАВКА */
@@ -27,78 +36,78 @@
         text-align: center; padding: 20px; color: white;
       }
       #overlay::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
-      #overlay h1 { font-size: clamp(1.8rem, 9vw, 4.5rem); margin-bottom: 15px; text-shadow: 0 8px 25px rgba(0,0,0,0.9); font-weight: 900; line-height: 1; letter-spacing: -2px; }
-      #overlay p { max-width: 450px; line-height: 1.5; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+      #overlay h1 { font-size: clamp(1.8rem, 9vw, 4.5rem); margin-bottom: 10px; text-shadow: 0 8px 25px rgba(0,0,0,0.9); font-weight: 900; letter-spacing: -2px; line-height: 1; }
+      #overlay p { max-width: 450px; line-height: 1.5; margin-bottom: 25px; font-size: 1.1rem; }
+      
+      .theme-toggle-btn { margin-bottom: 20px; padding: 10px 20px; border-radius: 30px; border: 2px solid white; background: transparent; color: white; font-weight: bold; cursor: pointer; }
       .start-btn { padding: 18px 50px; font-size: 1.3rem; background: var(--accent); color: white; border: none; border-radius: 60px; cursor: pointer; font-weight: 900; box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
 
       /* ПРИЛОЖЕНИЕ */
-      .app { max-width: 1400px; margin: 0 auto; padding: 10px; display: none; }
+      .app { max-width: 1400px; margin: 0 auto; padding: 10px; display: none; color: var(--text); }
       .panel { 
         background: var(--glass); border-radius: 24px; padding: 20px; 
         backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-        border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.2);
       }
 
       .ui-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
       .ui-group { 
-        background: rgba(255,255,255,0.85); padding: 10px; border-radius: 16px; 
+        background: var(--ui-bg); padding: 10px; border-radius: 16px; 
         border: 1px solid rgba(0,0,0,0.05); display: flex; gap: 8px; align-items: center;
       }
-      .ui-group label { font-size: 9px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px;}
+      .ui-group label { font-size: 9px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
 
       button, select, input { 
         padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); 
-        background: white; font-weight: 800; cursor: pointer; font-size: 12px; transition: 0.2s;
+        background: white; font-weight: 800; cursor: pointer; font-size: 12px;
       }
-      .primary { background: var(--accent); color: white; border: none; }
-      .danger { color: var(--danger); border-color: var(--danger); }
+      body.dark-theme button, body.dark-theme select { background: #1e293b; color: white; border-color: rgba(255,255,255,0.1); }
+      .primary { background: var(--accent) !important; color: white !important; border: none; }
       .selected { outline: 3px solid #000; transform: scale(1.05); z-index: 5; }
+      body.dark-theme .selected { outline-color: #fff; }
 
       /* СЕТКА */
       .grid-wrap { overflow-x: auto; border-radius: 16px; background: rgba(255,255,255,0.05); margin-bottom: 15px; border: 1px solid var(--border); }
       .grid-header, .grid-row { display: flex; min-width: max-content; }
       .track-label { 
-        position: sticky; left: 0; width: 110px; background: rgba(255, 255, 255, 0.95); 
+        position: sticky; left: 0; width: 110px; background: var(--ui-bg); 
         z-index: 10; padding: 8px; font-weight: 900; font-size: 11px; border-right: 2px solid var(--border);
       }
       .cell, .step { width: 38px; height: 38px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-      .step { display: grid; place-items: center; font-size: 10px; color: #334155; font-weight: 900; background: rgba(255,255,255,0.4); }
-      .cell.active { background: rgba(59, 130, 246, 0.7); box-shadow: inset 0 0 10px rgba(255,255,255,0.3); }
+      .step { display: grid; place-items: center; font-size: 10px; font-weight: 900; background: rgba(255,255,255,0.2); }
+      .cell.active { background: rgba(59, 130, 246, 0.7); }
       .cell.playhead { outline: 3px solid #fff; z-index: 5; background: rgba(255,255,255,0.2); }
 
       /* ИНВЕНТАРЬ */
       .palette-desktop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
-      .palette-mobile { display: none; }
-      .palette-column { background: rgba(255,255,255,0.45); padding: 8px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.3); }
-      .palette-column strong { display: block; text-align: center; color: #1e293b; font-size: 9px; margin-bottom: 6px; text-transform: uppercase; }
+      .palette-column { background: var(--glass); padding: 8px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.2); }
+      .palette-column strong { display: block; text-align: center; font-size: 9px; margin-bottom: 6px; text-transform: uppercase; }
       .sound-chip { width: 100%; margin-bottom: 5px; padding: 10px 2px; border: none; border-radius: 8px; color: white; font-weight: 900; font-size: 10px; }
 
       @media (max-width: 900px) {
-        .palette-desktop { display: none; } .palette-mobile { display: block; }
+        .palette-desktop { display: none; }
         .track-label { width: 42px; font-size: 18px; text-align: center; padding: 2px; }
-        .ui-container { gap: 6px; margin-bottom: 8px; }
-        .ui-group { width: 100%; justify-content: space-between; padding: 6px; }
         .ui-group label { display: none; }
         .toolbar-one-line { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 3px; }
-        .toolbar-one-line select { padding: 4px; font-size: 10px; }
         .toolbar-one-line input[type="range"] { width: 60px; }
         .cell, .step { width: 32px; height: 32px; }
-        .category-trigger { font-size: 12px !important; padding: 8px !important; }
       }
     </style>
   </head>
-  <body>
+  <body class="light-theme">
 
     <div id="overlay">
       <h1>МУЗЫКАЛЬНЫЙ БРИЗ</h1>
       <p>Создавай свою музыку в одно касание!<br><br>
-      <b>Инструкция:</b> Выбери инструмент внизу (он подсветится), а затем нажимай на клетки в таблице, чтобы расставить звуки.</p>
+      <b>Как играть:</b> Выбери инструмент внизу (он подсветится), а затем нажимай на клетки в таблице, чтобы расставить звуки.</p>
+      
+      <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 СМЕНИТЬ ТЕМУ</button>
+      <br>
       <button class="start-btn" onclick="startGame()">НАЧАТЬ ИГРУ</button>
     </div>
 
     <main class="app" id="mainApp">
       <section class="panel">
-        
         <div class="ui-container">
             <div class="ui-group">
                 <button id="playBtn" class="primary" onclick="startPlayback()">▶ PLAY</button>
@@ -106,18 +115,16 @@
                 <button onclick="exportWav()">💾 WAV</button>
                 <button class="danger" onclick="clearGrid()">🗑️ ОЧИСТИТЬ</button>
             </div>
-
             <div class="ui-group">
                 <label>Шаблоны</label>
                 <button onclick="loadPreset('beat')">БИТ</button>
                 <button onclick="loadPreset('dance')">ТАНЕЦ</button>
                 <button onclick="loadPreset('funk')">ФАНК</button>
             </div>
-
             <div class="ui-group">
                 <div class="toolbar-one-line">
                     <select id="stepsCount" onchange="changeSteps()"><option value="16">16 шаг.</option><option value="32" selected>32 шаг.</option></select>
-                    <label style="display:flex; align-items:center; gap:2px; font-size:10px; color:#1e293b"><input id="loop" type="checkbox" checked> ЛУП</label>
+                    <label style="display:flex; align-items:center; gap:2px; font-size:10px;"><input id="loop" type="checkbox" checked> ЛУП</label>
                     <div style="font-size:10px; font-weight:900">BPM: <input id="tempo" type="range" min="80" max="150" value="115" oninput="updateTempo(this.value)"> <span id="tempoVal">115</span></div>
                 </div>
             </div>
@@ -128,10 +135,10 @@
           <div id="gridBody"></div>
         </div>
 
-        <div id="status" style="text-align:center; font-weight:900; margin:8px; color:white; font-size:11px; text-transform:uppercase; letter-spacing:1px">🖌️ ВЫБЕРИ ИНСТРУМЕНТ И РИСУЙ</div>
+        <div id="status" style="text-align:center; font-weight:900; margin:8px; color:var(--accent); font-size:11px; text-transform:uppercase;">🖌️ Выбери инструмент и рисуй</div>
 
         <div class="palette-desktop" id="paletteDesktop"></div>
-        <div class="palette-mobile" id="paletteMobile"></div>
+        <div id="paletteMobile" style="display:none"></div>
       </section>
     </main>
 
@@ -151,6 +158,7 @@
       const audioCache = {};
 
       function startGame() { document.getElementById('overlay').style.display='none'; document.getElementById('mainApp').style.display='block'; if (audioCtx.state === 'suspended') audioCtx.resume(); }
+      function toggleTheme() { document.body.classList.toggle('dark-theme'); }
 
       function buildPalettes() {
         const desk = document.getElementById('paletteDesktop'), mob = document.getElementById('paletteMobile');
@@ -159,12 +167,21 @@
           const cat = tracks.find(t => t.id === key);
           const chips = sounds.map(s => `<button class="sound-chip" style="background:${s.color}" onclick="selectBrush('${key}','${s.file}','${s.name}','${s.color}',this)">${s.name}</button>`).join('');
           dH += `<div class="palette-column"><strong>${cat.n}</strong>${chips}</div>`;
-          mH += `<div class="category-item"><button class="category-trigger" style="width:100%;text-align:left;padding:10px;font-weight:900;border:1px solid #ddd;margin-bottom:2px" onclick="toggleMob('${key}')">${cat.i} ${cat.n} ▼</button><div style="display:none;padding:8px;grid-template-columns:1fr 1fr 1fr;gap:5px" id="cc-${key}">${chips}</div></div>`;
+          mH += `<div class="category-item"><button style="width:100%;text-align:left;padding:12px;font-weight:900" onclick="toggleMob('${key}')">${cat.i} ${cat.n} ▼</button><div style="display:none;padding:8px;grid-template-columns:1fr 1fr 1fr;gap:5px" id="cc-${key}">${chips}</div></div>`;
         });
         desk.innerHTML = dH; mob.innerHTML = mH;
+        if(window.innerWidth < 900) mob.style.display = 'block';
       }
 
-      function toggleMob(k) { const el=document.getElementById('cc-'+k); el.style.display = el.style.display==='none'?'grid':'none'; }
+      // ЛОГИКА АККОРДЕОНА: Только одна группа открыта за раз
+      function toggleMob(k) {
+        const allContents = document.querySelectorAll('[id^="cc-"]');
+        const target = document.getElementById('cc-' + k);
+        const isCurrentlyOpen = target.style.display === 'grid';
+
+        allContents.forEach(c => c.style.display = 'none'); // Закрыть всё
+        if (!isCurrentlyOpen) target.style.display = 'grid'; // Открыть нужный, если он был закрыт
+      }
 
       function selectBrush(cat, file, name, color, btn) {
         state.activeBrush = { cat, file, name, color };
@@ -217,7 +234,7 @@
       function loadPreset(p) {
         clearGrid();
         const data = {
-          beat: { s: 16, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'cymbals',s:2,i:0},{t:'cymbals',s:6,i:0},{t:'cymbals',s:10,i:0},{t:'cymbals',s:14,i:0},{t:'cymbals',s:0,i:0},{t:'cymbals',s:4,i:0},{t:'cymbals',s:8,i:0},{t:'cymbals',s:12,i:0}] },
+          beat: { s: 16, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'cymbals',s:2,i:0},{t:'cymbals',s:6,i:0},{t:'cymbals',s:10,i:0},{t:'cymbals',s:14,i:0},{t:'cymbals',s:4,i:1},{t:'cymbals',s:12,i:1}] },
           dance: { s: 32, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'drums',s:16,i:0},{t:'drums',s:20,i:0},{t:'drums',s:24,i:0},{t:'drums',s:28,i:0},{t:'cymbals',s:4,i:1},{t:'cymbals',s:12,i:1},{t:'cymbals',s:20,i:1},{t:'cymbals',s:28,i:1},{t:'cymbals',s:2,i:0},{t:'cymbals',s:10,i:0},{t:'bass',s:2,i:2},{t:'bass',s:6,i:2},{t:'bass',s:10,i:2},{t:'bass',s:14,i:2},{t:'synth',s:0,i:1}] },
           funk: { s: 32, d: [{t:'drums',s:0,i:1},{t:'drums',s:10,i:1},{t:'drums',s:16,i:1},{t:'drums',s:26,i:1},{t:'brass',s:14,i:1},{t:'brass',s:15,i:1},{t:'brass',s:30,i:1},{t:'brass',s:31,i:1},{t:'bass',s:0,i:1},{t:'bass',s:3,i:1},{t:'bass',s:8,i:1},{t:'guitar',s:4,i:2},{t:'guitar',s:12,i:2},{t:'guitar',s:20,i:2},{t:'guitar',s:28,i:2}] }
         }[p];
@@ -231,21 +248,6 @@
              if (el) { el.classList.add('active'); el.innerHTML = `<div style="width:100%;height:100%;background:${snd.color};border-radius:4px"></div>`; }
           });
         });
-      }
-
-      function audioBufferToWav(buffer) {
-        let numChannels = buffer.numberOfChannels, sampleRate = buffer.sampleRate, format = 1, bitDepth = 16;
-        let result = new Int16Array(buffer.length * numChannels);
-        for (let i = 0; i < numChannels; i++) {
-          let channel = buffer.getChannelData(i);
-          for (let j = 0; j < channel.length; j++) result[j * numChannels + i] = channel[j] * 32767;
-        }
-        let header = new ArrayBuffer(44), view = new DataView(header);
-        const writeString = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
-        writeString(0, 'RIFF'); view.setUint32(4, 36 + result.byteLength, true); writeString(8, 'WAVE'); writeString(12, 'fmt '); view.setUint32(16, 16, true);
-        view.setUint16(20, format, true); view.setUint16(22, numChannels, true); view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * numChannels * (bitDepth / 8), true);
-        view.setUint16(32, numChannels * (bitDepth / 8), true); view.setUint16(34, bitDepth, true); writeString(36, 'data'); view.setUint32(40, result.byteLength, true);
-        return new Blob([header, result], { type: 'audio/wav' });
       }
 
       async function exportWav() {
@@ -276,6 +278,21 @@
         const blob = audioBufferToWav(renderedBuffer);
         const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
         link.download = 'my_hit.wav'; link.click();
+      }
+
+      function audioBufferToWav(buffer) {
+        let numChannels = buffer.numberOfChannels, sampleRate = buffer.sampleRate;
+        let result = new Int16Array(buffer.length * numChannels);
+        for (let i = 0; i < numChannels; i++) {
+          let channel = buffer.getChannelData(i);
+          for (let j = 0; j < channel.length; j++) result[j * numChannels + i] = channel[j] * 32767;
+        }
+        let header = new ArrayBuffer(44), view = new DataView(header);
+        const writeString = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+        writeString(0, 'RIFF'); view.setUint32(4, 36 + result.byteLength, true); writeString(8, 'WAVE'); writeString(12, 'fmt '); view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); view.setUint16(22, numChannels, true); view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * numChannels * 2, true);
+        view.setUint16(32, numChannels * 2, true); view.setUint16(34, 16, true); writeString(36, 'data'); view.setUint32(40, result.byteLength, true);
+        return new Blob([header, result], { type: 'audio/wav' });
       }
 
       buildPalettes(); buildGrid();
