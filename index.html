@@ -7,32 +7,25 @@
     <style>
       :root {
         --accent: #3b82f6; --accent-2: #10b981; --danger: #ef4444;
-        
-        /* СВЕТЛАЯ ТЕМА */
         --bg-base: #e2e8f0;
         --glass: rgba(255, 255, 255, 0.25);
         --ui-bg: rgba(255, 255, 255, 0.85);
         --text: #1e293b; 
         --border: rgba(0, 0, 0, 0.15);
-        
-        /* Цвета для заставки */
-        --title-color: #1e3a8a; /* Красивый тёмно-синий для названия */
-        --overlay-text: #334155; /* Мягкий тёмно-серый для описания */
+        --title-color: #1e3a8a;
+        --overlay-text: #334155;
         --overlay-dim: rgba(255, 255, 255, 0.4); 
         --overlay-shadow: rgba(255, 255, 255, 0.8);
       }
       
       body.dark-theme {
-        /* ТЕМНАЯ ТЕМА */
         --bg-base: #1e293b;
         --glass: rgba(0, 0, 0, 0.4);
         --ui-bg: rgba(30, 41, 59, 0.9);
         --text: #f8fafc; 
         --border: rgba(255, 255, 255, 0.1);
-        
-        /* Цвета для заставки */
-        --title-color: #60a5fa; /* Светло-голубой, неоновый для названия */
-        --overlay-text: #e2e8f0; /* Светло-серый для описания */
+        --title-color: #60a5fa;
+        --overlay-text: #e2e8f0;
         --overlay-dim: rgba(0, 0, 0, 0.5); 
         --overlay-shadow: rgba(0, 0, 0, 0.8);
       }
@@ -55,20 +48,10 @@
         text-align: center; padding: 20px; color: var(--overlay-text);
       }
       #overlay::before { content: ''; position: absolute; inset: 0; background: var(--overlay-dim); z-index: -1; transition: background 0.4s ease; }
-      
-      /* Заголовок использует отдельную переменную цвета */
-      #overlay h1 { 
-        color: var(--title-color); 
-        font-size: clamp(1.8rem, 9vw, 4.5rem); margin-bottom: 15px; 
-        text-shadow: 0 8px 25px var(--overlay-shadow); font-weight: 900; line-height: 1; letter-spacing: -2px; 
-        transition: color 0.4s ease;
-      }
-      
+      #overlay h1 { color: var(--title-color); font-size: clamp(1.8rem, 9vw, 4.5rem); margin-bottom: 15px; text-shadow: 0 8px 25px var(--overlay-shadow); font-weight: 900; line-height: 1; letter-spacing: -2px; transition: color 0.4s ease; }
       #overlay p { max-width: 450px; line-height: 1.5; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 5px var(--overlay-shadow); font-weight: 600;}
-      
       .theme-toggle-btn { margin-bottom: 25px; padding: 12px 24px; border-radius: 30px; border: 2px solid var(--overlay-text); background: transparent; color: var(--overlay-text); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px;}
       .theme-toggle-btn:hover { background: var(--overlay-text); color: var(--bg-base); }
-      
       .start-btn { padding: 18px 50px; font-size: 1.3rem; background: var(--accent); color: white; border: none; border-radius: 60px; cursor: pointer; font-weight: 900; box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4); }
 
       /* ПРИЛОЖЕНИЕ */
@@ -84,18 +67,17 @@
         background: var(--ui-bg); padding: 10px; border-radius: 16px; 
         border: 1px solid rgba(0,0,0,0.05); display: flex; gap: 8px; align-items: center; transition: 0.3s;
       }
-      .ui-group label { font-size: 9px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px;}
 
       button, select, input { 
         padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); 
         background: transparent; color: var(--text); font-weight: 800; cursor: pointer; font-size: 12px; transition: 0.2s;
       }
       button:hover { background: rgba(148, 163, 184, 0.1); }
+      body.dark-theme button, body.dark-theme select { background: #1e293b; color: white; border-color: rgba(255,255,255,0.1); }
       
       .primary { background: var(--accent) !important; color: white !important; border: none; }
       .danger { color: var(--danger); border-color: var(--danger); }
       .danger:hover { background: rgba(239, 68, 68, 0.1); }
-      
       .selected { outline: 3px solid var(--text); transform: scale(1.05); z-index: 5; }
 
       /* СЕТКА */
@@ -111,20 +93,44 @@
       .cell.playhead { outline: 3px solid var(--text); z-index: 5; background: rgba(255,255,255,0.1); }
 
       /* ИНВЕНТАРЬ */
-      .palette-desktop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+      .palette-desktop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 15px; }
+      .palette-mobile { display: none; margin-bottom: 10px; }
       .palette-column { background: var(--glass); padding: 8px; border-radius: 14px; border: 1px solid var(--border); transition: 0.3s;}
       .palette-column strong { display: block; text-align: center; font-size: 9px; margin-bottom: 6px; text-transform: uppercase; }
       .sound-chip { width: 100%; margin-bottom: 5px; padding: 10px 2px; border: none; border-radius: 8px; color: white; font-weight: 900; font-size: 10px; }
 
+      /* БЛОК ШАБЛОНОВ ВНИЗУ */
+      .presets-zone { background: var(--ui-bg); padding: 12px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap;}
+      .presets-zone label { font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin-right: 5px;}
+
+      /* АДАПТИВНОСТЬ УЛЬТРА-КОМПАКТ (ТЕЛЕФОН) */
       @media (max-width: 900px) {
-        .palette-desktop { display: none; }
-        .track-label { width: 42px; font-size: 18px; text-align: center; padding: 2px; }
-        .ui-group label { display: none; }
-        .ui-group { width: 100%; justify-content: space-between; padding: 6px; }
-        .ui-container { gap: 6px; margin-bottom: 8px; }
-        .toolbar-one-line { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 3px; }
-        .toolbar-one-line input[type="range"] { width: 60px; }
-        .cell, .step { width: 32px; height: 32px; }
+        .app { padding: 4px; }
+        .panel { padding: 8px; border-radius: 18px; }
+        .palette-desktop { display: none; } .palette-mobile { display: block; }
+        
+        /* Убираем лишние отступы */
+        .ui-container { gap: 4px; margin-bottom: 6px; flex-direction: column; }
+        
+        /* Управление в две строчки */
+        .ui-group { width: 100%; justify-content: space-between; padding: 6px 8px; gap: 4px;}
+        button, select, input { padding: 8px 6px; font-size: 11px; }
+        
+        .toolbar-one-line { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 4px; }
+        .toolbar-one-line select { padding: 6px 4px; font-size: 10px; }
+        .toolbar-one-line input[type="range"] { width: 70px; margin: 0 4px; }
+        
+        /* Сетка тоньше */
+        .grid-wrap { margin-bottom: 6px; border-radius: 12px;}
+        .cell, .step { width: 30px; height: 30px; }
+        .track-label { width: 38px; font-size: 16px; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; }
+        
+        #status { margin: 4px 0; font-size: 10px; }
+        
+        /* Шаблоны внизу */
+        .presets-zone { padding: 8px; border-radius: 12px; gap: 4px;}
+        .presets-zone label { display: none; } /* Скрываем слово "Шаблоны" для экономии места */
+        .presets-zone button { flex: 1; padding: 8px 2px; font-size: 10px;}
       }
     </style>
   </head>
@@ -136,12 +142,12 @@
       <b>Как играть:</b> Выбери инструмент внизу (он подсветится), а затем нажимай на клетки в таблице, чтобы расставить звуки.</p>
       
       <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 СМЕНИТЬ ТЕМУ ФОНА</button>
-      
       <button class="start-btn" onclick="startGame()">НАЧАТЬ ИГРУ</button>
     </div>
 
     <main class="app" id="mainApp">
       <section class="panel">
+        
         <div class="ui-container">
             <div class="ui-group">
                 <button id="playBtn" class="primary" onclick="startPlayback()">▶ PLAY</button>
@@ -150,16 +156,16 @@
                 <button class="danger" onclick="clearGrid()">🗑️ ОЧИСТИТЬ</button>
             </div>
             <div class="ui-group">
-                <label>Шаблоны</label>
-                <button onclick="loadPreset('beat')">БИТ</button>
-                <button onclick="loadPreset('dance')">ТАНЕЦ</button>
-                <button onclick="loadPreset('funk')">ФАНК</button>
-            </div>
-            <div class="ui-group">
                 <div class="toolbar-one-line">
-                    <select id="stepsCount" onchange="changeSteps()"><option value="16">16 шаг.</option><option value="32" selected>32 шаг.</option></select>
-                    <label style="display:flex; align-items:center; gap:2px; font-size:10px;"><input id="loop" type="checkbox" checked> ЛУП</label>
-                    <div style="font-size:10px; font-weight:900">BPM: <input id="tempo" type="range" min="80" max="150" value="115" oninput="updateTempo(this.value)"> <span id="tempoVal">115</span></div>
+                    <select id="stepsCount" onchange="changeSteps()">
+                        <option value="16">16 шаг.</option>
+                        <option value="32" selected>32 шаг.</option>
+                        <option value="64">64 шаг.</option>
+                    </select>
+                    <label style="display:flex; align-items:center; font-size:11px; font-weight:bold"><input id="loop" type="checkbox" checked> ЛУП</label>
+                    <div style="font-size:11px; font-weight:900; display:flex; align-items:center;">
+                        BPM: <input id="tempo" type="range" min="80" max="150" value="115" oninput="updateTempo(this.value)"> <span id="tempoVal">115</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -169,11 +175,19 @@
           <div id="gridBody"></div>
         </div>
 
-        <div id="status" style="text-align:center; font-weight:900; margin:8px; color:var(--accent); font-size:11px; text-transform:uppercase;">🖌️ Выбери инструмент и рисуй</div>
+        <div id="status" style="text-align:center; font-weight:900; color:var(--accent); text-transform:uppercase;">🖌️ Выбери инструмент и рисуй</div>
 
         <div class="palette-desktop" id="paletteDesktop"></div>
+        <div id="paletteMobile" class="palette-mobile"></div>
         
-        <div id="paletteMobile" style="display:none;"></div>
+        <div class="presets-zone">
+            <label>Готовые шаблоны:</label>
+            <button onclick="loadPreset('beat')">БИТ</button>
+            <button onclick="loadPreset('dance')">ТАНЕЦ</button>
+            <button onclick="loadPreset('funk')">ФАНК</button>
+            <button class="primary" onclick="loadPreset('drive')" style="box-shadow: 0 0 10px rgba(59,130,246,0.5)">ДРАЙВ 🔥</button>
+        </div>
+
       </section>
     </main>
 
@@ -202,13 +216,12 @@
           const cat = tracks.find(t => t.id === key);
           const chips = sounds.map(s => `<button class="sound-chip" style="background:${s.color}" onclick="selectBrush('${key}','${s.file}','${s.name}','${s.color}',this)">${s.name}</button>`).join('');
           dH += `<div class="palette-column"><strong>${cat.n}</strong>${chips}</div>`;
-          mH += `<div style="margin-bottom:6px; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:var(--ui-bg);">
-                    <button style="width:100%; text-align:left; padding:12px; font-weight:900; border:none; background:transparent; color:var(--text);" onclick="toggleMob('${key}')">${cat.i} ${cat.n} ▼</button>
-                    <div style="display:none; padding:8px; grid-template-columns:1fr 1fr 1fr; gap:5px; background:var(--glass);" id="cc-${key}">${chips}</div>
+          mH += `<div style="margin-bottom:4px; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:var(--ui-bg);">
+                    <button style="width:100%; text-align:left; padding:10px; font-weight:900; border:none; background:transparent; color:var(--text);" onclick="toggleMob('${key}')">${cat.i} ${cat.n} ▼</button>
+                    <div style="display:none; padding:6px; grid-template-columns:1fr 1fr 1fr; gap:4px; background:var(--glass);" id="cc-${key}">${chips}</div>
                  </div>`;
         });
         desk.innerHTML = dH; mob.innerHTML = mH;
-        if(window.innerWidth <= 900) mob.style.display = 'block';
       }
 
       function toggleMob(k) { 
@@ -232,7 +245,6 @@
         const isMob = window.innerWidth <= 900;
         h.innerHTML = '<div class="track-label">ТРЕК</div>' + Array.from({length: state.steps}, (_, i) => `<div class="step">${i+1}</div>`).join('');
         b.innerHTML = tracks.map(t => `<div class="grid-row"><div class="track-label">${isMob ? t.i : t.n}</div>${Array.from({length: state.steps}, (_, i) => `<div class="cell" data-track="${t.id}" data-step="${i}" onclick="toggleCell(this)"></div>`).join('')}</div>`).join('');
-        document.getElementById('paletteMobile').style.display = isMob ? 'block' : 'none';
       }
 
       function toggleCell(el) {
@@ -266,16 +278,32 @@
       function renderPlayhead() { document.querySelectorAll('.cell').forEach(c => c.classList.remove('playhead')); if (state.isPlaying) document.querySelectorAll(`.cell[data-step="${state.currentStep}"]`).forEach(c => c.classList.add('playhead')); }
       function clearGrid() { state.sequence = {}; state.soundMap = {}; state.currentStep = 0; buildGrid(); }
       function changeSteps() { state.steps = parseInt(document.getElementById('stepsCount').value); clearGrid(); }
-      function updateTempo(v) { state.tempo = v; document.getElementById('tempoVal').textContent = v; }
+      function updateTempo(v) { state.tempo = v; document.getElementById('tempoVal').textContent = v; document.getElementById('tempo').value = v;}
 
       function loadPreset(p) {
         clearGrid();
         const data = {
-          beat: { s: 16, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'cymbals',s:2,i:0},{t:'cymbals',s:6,i:0},{t:'cymbals',s:10,i:0},{t:'cymbals',s:14,i:0},{t:'cymbals',s:0,i:0},{t:'cymbals',s:4,i:0},{t:'cymbals',s:8,i:0},{t:'cymbals',s:12,i:0}] },
-          dance: { s: 32, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'drums',s:16,i:0},{t:'drums',s:20,i:0},{t:'drums',s:24,i:0},{t:'drums',s:28,i:0},{t:'cymbals',s:4,i:1},{t:'cymbals',s:12,i:1},{t:'cymbals',s:20,i:1},{t:'cymbals',s:28,i:1},{t:'cymbals',s:2,i:0},{t:'cymbals',s:10,i:0},{t:'bass',s:2,i:2},{t:'bass',s:6,i:2},{t:'bass',s:10,i:2},{t:'bass',s:14,i:2},{t:'synth',s:0,i:1}] },
-          funk: { s: 32, d: [{t:'drums',s:0,i:1},{t:'drums',s:10,i:1},{t:'drums',s:16,i:1},{t:'drums',s:26,i:1},{t:'brass',s:14,i:1},{t:'brass',s:15,i:1},{t:'brass',s:30,i:1},{t:'brass',s:31,i:1},{t:'bass',s:0,i:1},{t:'bass',s:3,i:1},{t:'bass',s:8,i:1},{t:'guitar',s:4,i:2},{t:'guitar',s:12,i:2},{t:'guitar',s:20,i:2},{t:'guitar',s:28,i:2}] }
+          beat: { s: 16, bpm: 110, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'cymbals',s:2,i:0},{t:'cymbals',s:6,i:0},{t:'cymbals',s:10,i:0},{t:'cymbals',s:14,i:0},{t:'cymbals',s:0,i:0},{t:'cymbals',s:4,i:0},{t:'cymbals',s:8,i:0},{t:'cymbals',s:12,i:0}] },
+          dance: { s: 32, bpm: 122, d: [{t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'drums',s:16,i:0},{t:'drums',s:20,i:0},{t:'drums',s:24,i:0},{t:'drums',s:28,i:0},{t:'cymbals',s:4,i:1},{t:'cymbals',s:12,i:1},{t:'cymbals',s:20,i:1},{t:'cymbals',s:28,i:1},{t:'cymbals',s:2,i:0},{t:'cymbals',s:10,i:0},{t:'bass',s:2,i:2},{t:'bass',s:6,i:2},{t:'bass',s:10,i:2},{t:'bass',s:14,i:2},{t:'synth',s:0,i:1}] },
+          funk: { s: 32, bpm: 105, d: [{t:'drums',s:0,i:1},{t:'drums',s:10,i:1},{t:'drums',s:16,i:1},{t:'drums',s:26,i:1},{t:'brass',s:14,i:1},{t:'brass',s:15,i:1},{t:'brass',s:30,i:1},{t:'brass',s:31,i:1},{t:'bass',s:0,i:1},{t:'bass',s:3,i:1},{t:'bass',s:8,i:1},{t:'guitar',s:4,i:2},{t:'guitar',s:12,i:2},{t:'guitar',s:20,i:2},{t:'guitar',s:28,i:2}] },
+          // СУПЕР-ШАБЛОН ДРАЙВ (64 шага, 128 BPM)
+          drive: { s: 64, bpm: 128, d: [
+            {t:'drums',s:0,i:0},{t:'drums',s:4,i:0},{t:'drums',s:8,i:0},{t:'drums',s:12,i:0},{t:'drums',s:16,i:0},{t:'drums',s:20,i:0},{t:'drums',s:24,i:0},{t:'drums',s:28,i:0},{t:'drums',s:32,i:0},{t:'drums',s:36,i:0},{t:'drums',s:40,i:0},{t:'drums',s:44,i:0},{t:'drums',s:48,i:0},{t:'drums',s:52,i:0},{t:'drums',s:56,i:0},{t:'drums',s:60,i:0},
+            {t:'drums',s:14,i:1},{t:'drums',s:30,i:1},{t:'drums',s:46,i:1},{t:'drums',s:62,i:1},
+            {t:'cymbals',s:4,i:1},{t:'cymbals',s:12,i:1},{t:'cymbals',s:20,i:1},{t:'cymbals',s:28,i:1},{t:'cymbals',s:36,i:1},{t:'cymbals',s:44,i:1},{t:'cymbals',s:52,i:1},{t:'cymbals',s:60,i:1},
+            {t:'cymbals',s:2,i:0},{t:'cymbals',s:6,i:0},{t:'cymbals',s:10,i:0},{t:'cymbals',s:14,i:0},{t:'cymbals',s:18,i:0},{t:'cymbals',s:22,i:0},{t:'cymbals',s:26,i:0},{t:'cymbals',s:30,i:0},{t:'cymbals',s:34,i:0},{t:'cymbals',s:38,i:0},{t:'cymbals',s:42,i:0},{t:'cymbals',s:46,i:0},{t:'cymbals',s:50,i:0},{t:'cymbals',s:54,i:0},{t:'cymbals',s:58,i:0},{t:'cymbals',s:62,i:0},
+            {t:'cymbals',s:0,i:2},{t:'cymbals',s:32,i:2},
+            {t:'bass',s:0,i:2},{t:'bass',s:3,i:2},{t:'bass',s:6,i:2},{t:'bass',s:8,i:2},{t:'bass',s:11,i:2},{t:'bass',s:14,i:2},{t:'bass',s:16,i:2},{t:'bass',s:19,i:2},{t:'bass',s:22,i:2},{t:'bass',s:24,i:2},{t:'bass',s:27,i:2},{t:'bass',s:30,i:2},{t:'bass',s:32,i:2},{t:'bass',s:35,i:2},{t:'bass',s:38,i:2},{t:'bass',s:40,i:2},{t:'bass',s:43,i:2},{t:'bass',s:46,i:2},{t:'bass',s:48,i:2},{t:'bass',s:51,i:2},{t:'bass',s:54,i:2},{t:'bass',s:56,i:2},{t:'bass',s:59,i:2},{t:'bass',s:62,i:2},
+            {t:'synth',s:0,i:2},{t:'synth',s:4,i:2},{t:'synth',s:8,i:2},{t:'synth',s:12,i:2},{t:'synth',s:16,i:2},{t:'synth',s:20,i:2},{t:'synth',s:24,i:2},{t:'synth',s:28,i:2},{t:'synth',s:32,i:2},{t:'synth',s:36,i:2},{t:'synth',s:40,i:2},{t:'synth',s:44,i:2},{t:'synth',s:48,i:2},{t:'synth',s:52,i:2},{t:'synth',s:56,i:2},{t:'synth',s:60,i:2},
+            {t:'brass',s:28,i:0},{t:'brass',s:30,i:0},{t:'brass',s:60,i:0},{t:'brass',s:62,i:0}
+          ] }
         }[p];
-        state.steps = data.s; buildGrid();
+        
+        state.steps = data.s; 
+        document.getElementById('stepsCount').value = data.s; // Обновляем селект
+        updateTempo(data.bpm); // Устанавливаем идеальный темп
+        buildGrid();
+        
         data.d.forEach(n => {
           const snd = soundLibrary[n.t][n.i];
           state.sequence[n.t] = state.sequence[n.t] || {}; state.soundMap[n.t] = state.soundMap[n.t] || {};
