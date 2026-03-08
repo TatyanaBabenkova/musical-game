@@ -8,7 +8,7 @@
       :root {
         --accent: #3b82f6; --accent-2: #10b981; --danger: #ef4444;
         
-        /* СВЕТЛАЯ ТЕМА */
+        /* СВЕТЛАЯ ТЕМА (Серая подложка) */
         --bg-base: #e2e8f0;
         --glass: rgba(255, 255, 255, 0.25);
         --ui-bg: rgba(255, 255, 255, 0.85);
@@ -16,14 +16,14 @@
         --border: rgba(0, 0, 0, 0.15);
         
         /* Цвета для заставки */
-        --title-color: #1e3a8a;
-        --overlay-text: #334155;
+        --title-color: #1e3a8a; 
+        --overlay-text: #334155; 
         --overlay-dim: rgba(255, 255, 255, 0.4); 
         --overlay-shadow: rgba(255, 255, 255, 0.8);
       }
       
       body.dark-theme {
-        /* ТЕМНАЯ ТЕМА */
+        /* ТЕМНАЯ ТЕМА (Темно-серая подложка) */
         --bg-base: #1e293b;
         --glass: rgba(0, 0, 0, 0.4);
         --ui-bg: rgba(30, 41, 59, 0.9);
@@ -31,8 +31,8 @@
         --border: rgba(255, 255, 255, 0.1);
         
         /* Цвета для заставки */
-        --title-color: #60a5fa;
-        --overlay-text: #e2e8f0;
+        --title-color: #60a5fa; 
+        --overlay-text: #e2e8f0; 
         --overlay-dim: rgba(0, 0, 0, 0.5); 
         --overlay-shadow: rgba(0, 0, 0, 0.8);
       }
@@ -63,7 +63,7 @@
         transition: color 0.4s ease;
       }
       
-      #overlay p { max-width: 500px; line-height: 1.5; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 5px var(--overlay-shadow); font-weight: 600;}
+      #overlay p { max-width: 450px; line-height: 1.5; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 5px var(--overlay-shadow); font-weight: 600;}
       
       .theme-toggle-btn { margin-bottom: 25px; padding: 12px 24px; border-radius: 30px; border: 2px solid var(--overlay-text); background: transparent; color: var(--overlay-text); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px;}
       .theme-toggle-btn:hover { background: var(--overlay-text); color: var(--bg-base); }
@@ -96,8 +96,7 @@
       .danger { color: var(--danger); border-color: var(--danger); }
       .danger:hover { background: rgba(239, 68, 68, 0.1); }
       
-      /* НЕОНОВОЕ СВЕЧЕНИЕ ДЛЯ ВЫБРАННОГО ИНСТРУМЕНТА И БЕГУНКА */
-      .selected { outline: 2px solid var(--accent); transform: scale(1.05); z-index: 5; box-shadow: 0 0 12px rgba(59, 130, 246, 0.6); }
+      .selected { box-shadow: inset 0 0 0 2px var(--accent), 0 0 10px var(--accent); transform: scale(1.05); z-index: 5; }
 
       /* СЕТКА */
       .grid-wrap { overflow-x: auto; border-radius: 16px; background: rgba(255,255,255,0.05); margin-bottom: 15px; border: 1px solid var(--border); }
@@ -110,53 +109,32 @@
       .step { display: grid; place-items: center; font-size: 10px; font-weight: 900; background: rgba(255,255,255,0.1); }
       .cell.active { background: rgba(59, 130, 246, 0.7); box-shadow: inset 0 0 10px rgba(255,255,255,0.3); }
       
-      /* СИНЕЕ НЕОНОВОЕ СВЕЧЕНИЕ БЕГУНКА */
+      /* НОВЫЙ КРАСИВЫЙ СИНИЙ БЕГУНОК */
       .cell.playhead { 
-        outline: 2px solid var(--accent); 
+        box-shadow: inset 0 0 0 2px var(--accent), 0 0 12px rgba(59, 130, 246, 0.6); 
+        background: rgba(59, 130, 246, 0.2); 
         z-index: 5; 
-        background: rgba(59, 130, 246, 0.15); 
-        box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); 
       }
 
       /* ИНВЕНТАРЬ */
-      .palette-desktop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 15px; }
-      .palette-mobile { display: none; margin-bottom: 10px; }
+      .palette-desktop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
       .palette-column { background: var(--glass); padding: 8px; border-radius: 14px; border: 1px solid var(--border); transition: 0.3s;}
       .palette-column strong { display: block; text-align: center; font-size: 9px; margin-bottom: 6px; text-transform: uppercase; }
       .sound-chip { width: 100%; margin-bottom: 5px; padding: 10px 2px; border: none; border-radius: 8px; color: white; font-weight: 900; font-size: 10px; }
 
-      /* БЛОК ШАБЛОНОВ ВНИЗУ */
-      .presets-zone { background: var(--ui-bg); padding: 12px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; transition: 0.3s;}
-      .presets-zone label { font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin-right: 5px;}
-
       @media (max-width: 900px) {
-        .app { padding: 4px; }
-        .panel { padding: 8px; border-radius: 18px; }
-        .palette-desktop { display: none; } .palette-mobile { display: block; }
-        
-        .ui-container { gap: 4px; margin-bottom: 6px; flex-direction: column; }
-        .ui-group { width: 100%; justify-content: space-between; padding: 6px 8px; gap: 4px;}
+        .palette-desktop { display: none; }
+        .track-label { width: 42px; font-size: 18px; text-align: center; padding: 2px; }
         .ui-group label { display: none; }
-        
-        button, select, input { padding: 8px 6px; font-size: 11px; }
-        
-        .toolbar-one-line { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 4px; }
-        .toolbar-one-line select { padding: 6px 4px; font-size: 10px; }
-        .toolbar-one-line input[type="range"] { width: 70px; margin: 0 4px; }
-        
-        .grid-wrap { margin-bottom: 6px; border-radius: 12px;}
-        .cell, .step { width: 30px; height: 30px; }
-        .track-label { width: 38px; font-size: 16px; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; }
-        
-        #status { margin: 4px 0; font-size: 10px; }
-        
-        .presets-zone { padding: 8px; border-radius: 12px; gap: 4px;}
-        .presets-zone label { display: none; } 
-        .presets-zone button { flex: 1; padding: 8px 2px; font-size: 10px;}
+        .ui-group { width: 100%; justify-content: space-between; padding: 6px; }
+        .ui-container { gap: 6px; margin-bottom: 8px; }
+        .toolbar-one-line { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 3px; }
+        .toolbar-one-line input[type="range"] { width: 60px; }
+        .cell, .step { width: 32px; height: 32px; }
       }
     </style>
   </head>
-  <body class="dark-theme">
+  <body class="light-theme">
 
     <div id="overlay">
       <h1>МУЗЫКАЛЬНЫЙ БРИЗ</h1>
@@ -170,7 +148,6 @@
 
     <main class="app" id="mainApp">
       <section class="panel">
-        
         <div class="ui-container">
             <div class="ui-group">
                 <button id="playBtn" class="primary" onclick="startPlayback()">▶ PLAY</button>
@@ -178,7 +155,6 @@
                 <button onclick="exportWav()">💾 WAV</button>
                 <button class="danger" onclick="clearGrid()">🗑️ ОЧИСТИТЬ</button>
             </div>
-            
             <div class="ui-group" id="desktopPresets">
                 <label>Шаблоны</label>
                 <button onclick="loadPreset('beat')">БИТ</button>
@@ -186,16 +162,11 @@
                 <button onclick="loadPreset('funk')">ФАНК</button>
                 <button onclick="loadPreset('drive')">ДРАЙВ 🔥</button>
             </div>
-
             <div class="ui-group">
                 <div class="toolbar-one-line">
-                    <select id="stepsCount" onchange="changeSteps()">
-                        <option value="16">16 шаг.</option>
-                        <option value="32" selected>32 шаг.</option>
-                        <option value="64">64 шаг.</option>
-                    </select>
-                    <label style="display:flex; align-items:center; font-size:11px; font-weight:bold"><input id="loop" type="checkbox" checked> ЛУП</label>
-                    <div style="font-size:11px; font-weight:900; display:flex; align-items:center;">
+                    <select id="stepsCount" onchange="changeSteps()"><option value="16">16 шаг.</option><option value="32" selected>32 шаг.</option><option value="64">64 шаг.</option></select>
+                    <label style="display:flex; align-items:center; gap:2px; font-size:10px;"><input id="loop" type="checkbox" checked> ЛУП</label>
+                    <div style="font-size:10px; font-weight:900; display:flex; align-items:center;">
                         BPM: <input id="tempo" type="range" min="80" max="150" value="115" oninput="updateTempo(this.value)"> <span id="tempoVal">115</span>
                     </div>
                 </div>
@@ -207,13 +178,12 @@
           <div id="gridBody"></div>
         </div>
 
-        <div id="status" style="text-align:center; font-weight:900; color:var(--accent); text-transform:uppercase;">🖌️ Выбери инструмент и рисуй</div>
+        <div id="status" style="text-align:center; font-weight:900; margin:8px; color:var(--accent); font-size:11px; text-transform:uppercase;">🖌️ Выбери инструмент и рисуй</div>
 
         <div class="palette-desktop" id="paletteDesktop"></div>
-        <div id="paletteMobile" class="palette-mobile"></div>
+        <div id="paletteMobile" style="display:none;"></div>
         
-        <div class="presets-zone" id="mobilePresets" style="display:none;">
-            <label>Готовые шаблоны:</label>
+        <div class="ui-group" id="mobilePresets" style="display:none; justify-content:center; margin-top:10px;">
             <button onclick="loadPreset('beat')">БИТ</button>
             <button onclick="loadPreset('dance')">ТАНЕЦ</button>
             <button onclick="loadPreset('funk')">ФАНК</button>
@@ -369,9 +339,20 @@
         return new Blob([header, result], { type: 'audio/wav' });
       }
 
+      // ДОБАВЛЕН КОМПРЕССОР ПРОТИВ ХРИПОВ ПРИ ЭКСПОРТЕ
       async function exportWav() {
         const totalDuration = 30, sr = 44100;
         const offlineCtx = new OfflineAudioContext(2, sr * totalDuration, sr);
+        
+        // Лимитер (компрессор), чтобы звуки не складывались больше 100% громкости
+        const compressor = offlineCtx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-6, offlineCtx.currentTime);
+        compressor.knee.setValueAtTime(10, offlineCtx.currentTime);
+        compressor.ratio.setValueAtTime(12, offlineCtx.currentTime);
+        compressor.attack.setValueAtTime(0.003, offlineCtx.currentTime);
+        compressor.release.setValueAtTime(0.25, offlineCtx.currentTime);
+        compressor.connect(offlineCtx.destination);
+
         const stepDur = (60 / state.tempo) / 4;
         
         for (let loop = 0; loop < Math.ceil(totalDuration / (state.steps * stepDur)); loop++) {
@@ -385,7 +366,8 @@
                   let buffer = audioCache[state.soundMap[track.id][step].file];
                   if (buffer) {
                     let source = offlineCtx.createBufferSource();
-                    source.buffer = buffer; source.connect(offlineCtx.destination);
+                    source.buffer = buffer; 
+                    source.connect(compressor); // Подключаем к компрессору, а не напрямую!
                     source.start(start);
                   }
                 }
@@ -393,6 +375,7 @@
             }
           });
         }
+        
         const renderedBuffer = await offlineCtx.startRendering();
         const blob = audioBufferToWav(renderedBuffer);
         const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
